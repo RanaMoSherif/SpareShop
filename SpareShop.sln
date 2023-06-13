@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpareShop.API", "SpareShop.API\SpareShop.API.csproj", "{DE7F36FD-FB01-459F-8624-F03868760751}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpareShop.Domain", "SpareShop.Domain\SpareShop.Domain.csproj", "{FAECC0F8-86EB-486E-A925-41D7333DBADC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpareShop.Data", "SpareShop.Data\SpareShop.Data.csproj", "{F4E3A58E-CD49-4B02-89F3-4027F5206B93}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE7F36FD-FB01-459F-8624-F03868760751}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE7F36FD-FB01-459F-8624-F03868760751}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE7F36FD-FB01-459F-8624-F03868760751}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE7F36FD-FB01-459F-8624-F03868760751}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAECC0F8-86EB-486E-A925-41D7333DBADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAECC0F8-86EB-486E-A925-41D7333DBADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAECC0F8-86EB-486E-A925-41D7333DBADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAECC0F8-86EB-486E-A925-41D7333DBADC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4E3A58E-CD49-4B02-89F3-4027F5206B93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4E3A58E-CD49-4B02-89F3-4027F5206B93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4E3A58E-CD49-4B02-89F3-4027F5206B93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4E3A58E-CD49-4B02-89F3-4027F5206B93}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
