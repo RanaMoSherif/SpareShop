@@ -24,7 +24,7 @@ public class ProductsController : ControllerBase
     
 
     [HttpGet("ownProduct")]
-    [Authorize(Policy = "Vendor")]
+    //[Authorize(Policy = "Vendor")]
     public async Task<ActionResult<IEnumerable<ReadProductDto>>> GetAllOwn()
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -79,7 +79,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "Vendor")]
+    //[Authorize(Policy = "Vendor")]
     public async Task<ActionResult<ReadProductDto>> CreateProduct(AddProductDto dto)
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -87,7 +87,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = "Vendor")]
+    //[Authorize(Policy = "Vendor")]
     public ActionResult UpdateProduct(Guid id, UpdateProductDto dto)
     {
         if (id != dto.Id)
@@ -103,7 +103,7 @@ public class ProductsController : ControllerBase
     }
     
     [HttpDelete("{id}")]
-    [Authorize(Policy = "Vendor")]
+    //[Authorize(Policy = "Vendor")]
     public ActionResult DeleteProduct(Guid id)
     {
         if (!_productsManager.Delete(id))

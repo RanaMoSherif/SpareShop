@@ -37,7 +37,7 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "Client")]
+    //[Authorize(Policy = "Client")]
     public async Task<ActionResult<UpdateShoppingCartDto>> AssignProduct(AssignProductToCartDto dto)
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -54,7 +54,7 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpPut("IncrementCount")]
-    [Authorize(Policy = "Client")]
+    //[Authorize(Policy = "Client")]
     public async Task<ActionResult> IncrementCount(Guid productId)
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -68,7 +68,7 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpPut("DecrementCount")]
-    [Authorize(Policy = "Client")]
+    //s[Authorize(Policy = "Client")]
     public async Task<ActionResult> DecrementCount(Guid productId)
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -82,7 +82,7 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpPut("ChangeCount")]
-    [Authorize(Policy = "Client")]
+    //[Authorize(Policy = "Client")]
     public async Task<ActionResult> ChangeCount(Guid productId, int count)
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -96,7 +96,7 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpDelete]
-    [Authorize(Policy = "Client")]
+    //[Authorize(Policy = "Client")]
     public async Task<ActionResult> DeleteShoppingCart(Guid productId)
     {
         var currentUser = await _userManager.GetUserAsync(User);

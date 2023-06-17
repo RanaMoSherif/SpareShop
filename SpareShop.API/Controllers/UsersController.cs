@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize(Policy = "Manager")]
+    //[Authorize(Policy = "Manager")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
     {
         var modelItems = await _userManager.Users.ToListAsync();
@@ -77,7 +77,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("OwnInfo")]
-    [Authorize]
+    //[Authorize]
     public async Task<ActionResult<UserDto>> GetOwnInfo()
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -121,7 +121,7 @@ public class UsersController : ControllerBase
     }
     
     [HttpDelete]
-    [Authorize(Policy = "Manager")]
+    //[Authorize(Policy = "Manager")]
     public async Task<IActionResult> DeleteUser(Guid userId)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -139,7 +139,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("logout")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
