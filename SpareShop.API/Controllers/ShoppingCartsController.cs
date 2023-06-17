@@ -23,8 +23,17 @@ public class ShoppingCartsController : ControllerBase
     [Authorize(Policy = "Client")]
     public async Task<ActionResult<IEnumerable<ReadShoppingCartDto>>> GetAll()
     {
+        IEnumerable<ReadShoppingCartDto> shoppingCart = new List<ReadShoppingCartDto>();
         var currentUser = await _userManager.GetUserAsync(User);
-        return Ok(_shoppingCartsManager.GetAll().Where(c => c.UserId == currentUser!.Id));
+        if (currentUser !=null)
+        {
+            shoppingCart = _shoppingCartsManager.GetAll().Where(c => c.UserId == currentUser!.Id);
+            return Ok(shoppingCart);
+        }
+        else
+        {
+            return BadRequest("User Not Found or Not Signed In");
+        }
     }
 
     [HttpPost]
@@ -32,8 +41,16 @@ public class ShoppingCartsController : ControllerBase
     public async Task<ActionResult<UpdateShoppingCartDto>> AssignProduct(AssignProductToCartDto dto)
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        dto.UserId = currentUser!.Id;
-        return Ok(await _shoppingCartsManager.AssignProduct(dto));
+
+        if (currentUser != null)
+        {
+            dto.UserId = currentUser!.Id;
+            return Ok(await _shoppingCartsManager.AssignProduct(dto));
+        }
+        else
+        {
+            return BadRequest("User Not Found or Not Signed In");
+        }
     }
 
     [HttpPut("IncrementCount")]
