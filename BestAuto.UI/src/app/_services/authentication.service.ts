@@ -12,8 +12,26 @@ import { Setting } from '../_models/setting';
 export class AuthenticationService {
   private path = environment.apiUrl;
   userr: RegisterDto[] = [];
+  token: any;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.token= localStorage.getItem('token');
+  }
+
+
+
+  AddProductToCard(Product: any) {
+    let token: any= localStorage.getItem('token');
+    var headers_object = new HttpHeaders().set('Authorization', 'Bearer ' +  token);
+    return this.http.post<any>(
+      'https://localhost:7029/api/ShoppingCarts',
+      Product , {
+             headers: headers_object
+           }
+    );
+  }
+
+
 
   register(model: RegisterDto): Observable<any> {
     return this.http.post(`${this.path}Users/register`, model);
@@ -30,11 +48,9 @@ export class AuthenticationService {
   baseurl = 'https://localhost:7029/api/Users';
 
   getallusers() {
-    let token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImFkbWluQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6ImFsaSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiOTk5MjM4ZGMtMTM5My00ZDY3LWFlNGYtMDhkYWMxZDU1ZWEzIiwiZXhwIjoxNjcxOTg4OTc1LCJpc3MiOiJTZWN1cmVBcGkiLCJhdWQiOiJTZWN1cmVBcGlVc2VyIn0.IFgqwY_5EEpqN32sJ-9EPixCNFtUzqEA9Sf7IgCysAo';
     let headers_object = new HttpHeaders().set(
       'Authorization',
-      'Bearer ' + token
+      'Bearer ' + this.token
     );
     return this.http.get<RegisterDto[]>(this.baseurl, {
       headers: headers_object,
@@ -42,11 +58,10 @@ export class AuthenticationService {
   }
 
   deleteuserbyid(id: any) {
-    let token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImFkbWluQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6ImFsaSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiOTk5MjM4ZGMtMTM5My00ZDY3LWFlNGYtMDhkYWMxZDU1ZWEzIiwiZXhwIjoxNjcxOTg4OTc1LCJpc3MiOiJTZWN1cmVBcGkiLCJhdWQiOiJTZWN1cmVBcGlVc2VyIn0.IFgqwY_5EEpqN32sJ-9EPixCNFtUzqEA9Sf7IgCysAo';
+    
     let headers_object = new HttpHeaders().set(
       'Authorization',
-      'Bearer ' + token
+      'Bearer ' + this.token
     );
     return this.http.delete(this.baseurl + '?userId=' + id, {
       headers: headers_object,
@@ -66,6 +81,16 @@ export class AuthenticationService {
     return this.http.put<any>(
       'https://localhost:7029/api/Users/' + set.id,
       set
+    );
+  }
+//   'https://localhost:7029/api/Users/OwnInfo'
+  getUserDetail() {
+    let token: any= localStorage.getItem('token');
+    var headers_object = new HttpHeaders().set('Authorization', 'Bearer ' +  token);
+    return this.http.get<any>(
+      'https://localhost:7029/api/Users/OwnInfo', {
+        headers: headers_object
+      }
     );
   }
 }

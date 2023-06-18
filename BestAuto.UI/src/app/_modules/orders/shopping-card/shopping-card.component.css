@@ -16,7 +16,7 @@
 }
 
 .number-input button {
-  -webkit-appearance: none;
+  /*-webkit-appearance: none;*/
   background-color: transparent;
   border: none;
   align-items: center;
@@ -127,10 +127,11 @@
   border: none;
   border-radius: 1rem;
   padding: 1.5%;
-  background: hsla(239, 29%, 54%, 1);
+  background: var(--salmon-pink);
   font-weight: 600;
   color: #fff;
   cursor: pointer;
+  margin-top: 15%;
 }
 
 .empty {
@@ -139,4 +140,10 @@
   justify-content: center;
   align-content: center;
   text-align: center;
+}
+
+.payment-method{
+  font-size: 20px;
+display: inline-flex;
+
 }

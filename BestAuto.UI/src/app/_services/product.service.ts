@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Card } from '../_models/card';
@@ -38,8 +38,19 @@ export class ProductService {
     return this.http.get<Product>(this.path + id);
   }
 
+
+
+
+
+
+
+
   addProduct(product: Product) {
-    return this.http.post(this.path, product);
+    let token: any= localStorage.getItem('token');
+    var headers_object = new HttpHeaders().set('Authorization', 'Bearer ' +  token);
+    return this.http.post(this.path, product, {
+      headers: headers_object
+    });
   }
   deleteProductById(id: number) {
     return this.http.delete(this.path + id);
@@ -63,10 +74,25 @@ export class ProductService {
     return this.http.get<Product[]>(this.path);
   }
 
-  AddProductToCard(Product: Card) {
+  AddProductToCard(Product: any) {
+    let token: any= localStorage.getItem('token');
+    var headers_object = new HttpHeaders().set('Authorization', 'Bearer ' +  token);
     return this.http.post<Card>(
       'https://localhost:7029/api/ShoppingCarts',
-      Product
+      Product , {
+             headers: headers_object
+           }
     );
   }
 }
+
+
+// getUserDetail() {
+//   let token: any= localStorage.getItem('token');
+//   var headers_object = new HttpHeaders().set('Authorization', 'Bearer ' +  token);
+//   return this.http.get<any>(
+//     'https://localhost:7029/api/Users/OwnInfo', {
+//       headers: headers_object
+//     }
+//   );
+// }

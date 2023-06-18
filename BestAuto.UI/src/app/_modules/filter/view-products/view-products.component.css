@@ -1,10 +1,10 @@
-* {
-  /*
+* /*{
+  
   background: #000 !important;
   color: #0f0 !important;
   outline: solid #f00 1px !important;
-  */
-}
+  
+}*/
 
 .view-flex {
   display: flex;
@@ -26,7 +26,7 @@
   list-style: none;
 }
 
-.custome-sidebar h6 {
+.custome-sidebar h3 {
   background-color: #323440;
   text-align: center;
   border-top-left-radius: 10px;
@@ -47,7 +47,7 @@
   margin: auto;
 }
 .btn-custom1 {
-  background-color: #6667ab !important;
+  background-color: var(--salmon-pink) !important;
 }
 
 .btn-custom2 {
@@ -96,7 +96,7 @@
 
 .custom-card {
   border-radius: 10px !important;
-  border: 0.5px solid #6667ab !important;
+  border: 0.5px solid var(--salmon-pink) !important;
   width: 250px !important;
 }
 
@@ -134,7 +134,7 @@ footer {
 }
 .title-desc {
   font-size: 0.8rem;
-  color: #6667ab;
+  color: var(--salmon-pink);
   font-weight: 700;
 }
 .txt-price {

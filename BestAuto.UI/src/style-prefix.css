@@ -10,7 +10,9 @@
   --spanish-gray: hsl(0, 0%, 60%);
   --sonic-silver: hsl(0, 0%, 47%);
   --eerie-black: hsl(0, 0%, 13%);
-  --salmon-pink: hsla(239, 29%, 54%, 1);
+  --salmon-pink: #0076e4;
+  --blue:#2587e2;
+  --dark-blue:#0076e4;
   --sandy-brown: hsl(29, 90%, 65%);
   --bittersweet: hsl(0, 100%, 70%);
   --ocean-green: hsl(152, 51%, 52%);
@@ -82,6 +84,12 @@ button {
   border: none;
   cursor: pointer;
 }
+
+.nav-bar1{margin-left: 5%;
+font-size: 120%;
+margin-top: 0.5%;}
+
+.nav-bar2{margin-left: 5%;}
 
 img,
 ion-icon,
@@ -621,7 +629,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .banner-subtitle {
-  color: var(--salmon-pink);
+  color: var(--blue);
   font-size: var(--fs-7);
   font-weight: var(--weight-500);
   text-transform: capitalize;
@@ -865,9 +873,9 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .product-btn {
+  background-color: var(--blue);
+  color: #ffffff;
   margin: auto;
-  background: var(--salmon-pink);
-  color: var(--white);
   width: -webkit-max-content;
   width: -moz-max-content;
   width: max-content;
@@ -875,16 +883,18 @@ body::-webkit-scrollbar-thumb:hover {
   font-weight: var(--weight-600);
   text-transform: uppercase;
   padding: 6px 14px;
-  -webkit-border-radius: var(--border-radius-sm);
-  border-radius: var(--border-radius-sm);
+  border-radius: 8px;
   -webkit-transition: var(--transition-timing);
   -o-transition: var(--transition-timing);
   transition: var(--transition-timing);
 }
 
 .product-btn:hover {
-  background: var(--eerie-black);
-}
+  color: black;
+  background-color: whitesmoke;
+  border:1px solid black;
+  border-radius: 10px;
+}*/
 
 /*-----------------------------------*\
   #PRODUCT GRID

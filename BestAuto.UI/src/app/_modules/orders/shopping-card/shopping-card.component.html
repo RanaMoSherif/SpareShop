@@ -140,10 +140,19 @@
                       </div>
                     </div>
                   </div>
-                  <button
+                  
+                  <div class="form-check form-check-inline">
+                    <h4 style="margin-left: -20px; font-weight: bold;">Available Payment Methoed</h4> 
+                    <label class="payment-method form-check-label" for="exampleRadios2">
+                       <h3>Cash on delivery</h3>               </label>
+                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="b">
+                 </div>
+
+                  <button 
                     type="button"
                     class="btn btnContact btn-block btn-lg"
                     (click)="alert()"
+                    style="margin-left: -38%; margin-bottom: -10%;"
                   >
                     Buy now
                   </button>

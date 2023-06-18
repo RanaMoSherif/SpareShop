@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Brand } from 'src/app/_models/brand';
 import { Category } from 'src/app/_models/category';
 import { Product } from 'src/app/_models/product';
@@ -37,8 +37,12 @@ export class HomePageComponent implements OnInit {
     public brandService: BrandService,
     public ProductService: ProductService,
     public ActiveRouter: ActivatedRoute,
-    public categoryService: CategoryService
-  ) {}
+    public categoryService: CategoryService,
+  ) {
+
+  }
+
+
 
   addProduct(prod: Product) {
     this.ProductService.AddProduct().subscribe((p) => {

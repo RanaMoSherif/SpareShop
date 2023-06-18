@@ -90,20 +90,37 @@ export class ViewProductsComponent implements OnInit {
   //   this.change(this.dummyId2);
   //   console.log(this.products);
   // }
+// { variable1: "Value" }
+
+// this.router.navigate(['/route1'], { variable1: "Value" }); this.router.navigateByUrl('/route1', { variable1: "Value" });
+
+
 
 viewinfo(item:Product){
   console.log(item);
   this.productService.GetProductById(item.id).subscribe((a) => {
-    this.router.navigateByUrl("/ProductDetails")
+    console.log("viewinfo", a)
+   // this.router.navigate(['/ProductDetails'],  { variable1: "Value" } );
+   // this.router.navigate(['/route1'], { variable1: "Value" });
+    this.router.navigate(['/ProductDetails'],{queryParams: {id: item.id}})
+
   })
 }
 
-  addCard(cardId: string) {
-    console.log(cardId);
-    this.productService.GetProductById(cardId).subscribe((a) => {
-      this.card.count = a.count;
-      this.card.productId = a.id;
-     var TT = localStorage.getItem("token");
+  addToCart(item: any) {
+    console.log("cardId", item);
+    let user: any =  localStorage.getItem('userDetail')
+    
+    
+    console.log("getUser localStorage.setItem('token', response.token)", JSON.parse(user) );
+    let productObj;
+    productObj = {
+      productId: item.id,
+      count: 1,
+      userId: JSON.parse(user).id,
+    }
+    this.productService.AddProductToCard(productObj).subscribe((a) => {
+
     });
   }
 }

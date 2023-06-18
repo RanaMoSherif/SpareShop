@@ -1,6 +1,6 @@
-# BestAuto
+# Best-Auto
 
-Website BestAuto allows buying any products you want related to the automotive field online as spare parts, accessories, lubricants, sound systems, car care products, engine performance improvement products, lighting products, and all that is related to improving the lighting of your car. You will also find offers and deals on maintenance products such as spark plugs, Brake pads, Filters, and motor oils.
+Website EGY SPARE allows buying any products you want related to the automotive field online as spare parts, accessories, lubricants, sound systems, car care products, engine performance improvement products, lighting products, and all that is related to improving the lighting of your car. You will also find offers and deals on maintenance products such as spark plugs, Brake pads, Filters, and motor oils.
 
 	HTML5, CSS3, Bootstrap, Angular
 	Prime ng, Material UI, Font Awesome
@@ -10,4 +10,4 @@ Website BestAuto allows buying any products you want related to the automotive f
 	Locatization, Dockarize App
 	QR Code, and External Login
 
-## ITI Graduation Project
+## FGSR Graduation Project

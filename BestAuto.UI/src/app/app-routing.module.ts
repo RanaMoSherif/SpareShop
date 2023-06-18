@@ -18,6 +18,7 @@ import { LoginComponent } from './_modules/user/login/login.component';
 import { SettingComponent } from './_modules/user/setting/setting.component';
 import { SignupComponent } from './_modules/user/signup/signup.component';
 import { UserListComponent } from './_modules/user/user-list/user-list.component';
+import { ProductCreateComponent } from './_modules/product/product-create/product-create.component';
 
 const routes: Routes = [
   { path: 'home', component: HomePageComponent },
@@ -34,6 +35,7 @@ const routes: Routes = [
   { path: 'categories/create', component: CategoriesCreateComponent },
   { path: 'categories/update/:id', component: CategoriesUpdateComponent },
   { path: 'admin/product/list', component: ProductListComponent },
+  { path: 'admin/product/create', component: ProductCreateComponent },
   { path: 'admin/brand/list', component:  BrandsListComponent},
   { path: 'admin/brand/create', component: BrandsCreateComponent },
   { path: 'admin/brand/update/:id', component: BrandsUpdateComponent },

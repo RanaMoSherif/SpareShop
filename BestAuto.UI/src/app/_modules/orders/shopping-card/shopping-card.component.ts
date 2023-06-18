@@ -77,7 +77,7 @@ export class ShoppingCardComponent implements OnInit {
   alert() {
     Swal.fire(
       'Thank You',
-      'We Repair Your Product And Contact With You..',
+      'We Repair Your Order And Contact You Later..',
       'success'
     );
     this.router.navigateByUrl('/home');

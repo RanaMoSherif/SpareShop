@@ -18,6 +18,7 @@ import { CategoriesModule } from './_modules/categories/categories.module';
 import { ProductModule } from './_modules/product/product.module';
 import { BrandsModule } from './_modules/brands/brands.module';
 import { OrdersModule } from './_modules/orders/orders.module';
+import { HomeService } from './_services/home.service';
 // // import { CategoriesUpdateComponent } from './_modules/categories/categories-update/categories-update.component';
 // // import { CategoriesCreateComponent } from './_modules/categories/categories-create/categories-create.component';
 
@@ -45,7 +46,7 @@ import { OrdersModule } from './_modules/orders/orders.module';
     BrandsModule,
     OrdersModule,
   ],
-  providers: [],
+  providers: [HomeService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

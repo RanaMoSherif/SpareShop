@@ -9,6 +9,7 @@ export class AdminNavComponent implements OnInit {
   // ezay t8er sora
   url = './assets/download.jpg';
   x: any;
+  user: any;
 
   constructor() {}
 
@@ -22,5 +23,10 @@ export class AdminNavComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.user =  localStorage.getItem('userDetail')
+    this.user  = JSON.parse(this.user);
+    
+    console.log("getUser",this.user)
+  }
 }

@@ -2,7 +2,7 @@
   color: brown;
 }
 mat-toolbar {
-  background: #6667ab;
+  background: #0076e4;
   color: white;
   text-align: center;
   justify-content: center;
@@ -14,7 +14,7 @@ mat-sidenav {
   margin: 16px;
   width: 200px;
   border-right: none;
-  background: #002b5c;
+  background: #000000;
   color: white;
   border-radius: 10px;
   padding: 16px;
@@ -24,6 +24,7 @@ a {
   padding-bottom: 30px;
   margin-bottom: 30px;
   font-size: 1rem;
+  color: whitesmoke !important;
 }
 
 .content {

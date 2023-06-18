@@ -1,9 +1,9 @@
 <nav
   class="navbar navbar-expand-lg fixed-top"
-  style="background-color: #6667ab"
+  style="background-color: #000000"
 >
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">BestAuto</a>
+    <a class="navbar-brand text-light fw-semibold" href="#">BestAuto</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -15,47 +15,65 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <div class="collapse navbar-collapse nav-bar1" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/home"
+          <a class="nav-link active text-light " aria-current="page" routerLink="/home"
             >Home</a
           >
         </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/Products"
+        <!-- <li class="nav-item nav-bar2">
+          <a class="nav-link active text-light " aria-current="page" routerLink="/Products"
             >Products</a
           >
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/card">Card</a>
-        </li>
+        </li> -->
 
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/Admin">Admin</a>
+        <li class="nav-item nav-bar2" *ngIf="user?.role == 'Admin' ||  user?.role == 'Vendor'">
+          <a class="nav-link text-light " routerLink="/Admin">Admin</a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link" routerLink="/setting">Setting</a>
+        <!--<li class="nav-item nav-bar2">
+          <a class="nav-link text-light" routerLink="/setting">Setting</a>
         </li> -->
       </ul>
       <!-- <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Search</button>
         </form> -->
-      <button
+        <!-- <li class="nav-item nav-bar2">
+          <a class="nav-link text-light " routerLink="/card">Cart</a>
+        </li> -->
+
+        <button
+        routerLink="/card"
+        class="btn btn-outline-dark w-1 p-1.6"
+        style="color:whitesmoke; "
+      >
+        <p style="margin-top: 10%;">Cart</p>
+      </button>
+      <button *ngIf="!user?.role"
         routerLink="/signup"
-        class="btn bgcolor mx-3"
-        style="background-color: #6667ab"
+        class="btn btn-outline-dark w-1 p-1.6"
+        style="color:whitesmoke; "
       >
-        <p>Sing up</p>
+        <p style="margin-top: 10%;">Sign up</p>
       </button>
-      <button
+      <button *ngIf="!user?.role"
         routerLink="/login"
-        class="btn bgcolor"
-        style="background-color: #6667ab"
+        class="btn  btn-outline-dark w-1 p-2.4"
+        style="color:whitesmoke ;"
       >
-        <p>Login</p>
+        <p style="margin-top: 10%;">Login</p>
       </button>
+
+      <button *ngIf="user?.role"
+      (click)="logout()"
+      routerLink="/home"
+      class="btn  btn-outline-dark w-1 p-2.4"
+      style="color:whitesmoke ;"
+    >
+      <p style="margin-top: 10%;">Logout</p>
+    </button>
+
     </div>
   </div>
 </nav>
