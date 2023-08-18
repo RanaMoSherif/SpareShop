@@ -21,14 +21,11 @@
               dotnet tool install --global dotnet-sonarscanner --version 5.11.0
               echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
               
-        # - run:
-        #     name: Install Openjdk for SonarScanner
-        #     command: |
-        #       # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
-        #       apt update
-        #       apt install -y openjdk-17-jdk
-        #       set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
-        #       export JAVA_HOME
+        - run:
+            name: Install Openjdk for SonarScanner
+            command: |
+              # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
+              apt update && apt install -y openjdk-17-jdk && set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/ && export JAVA_HOME
 
         - run:
             name: Run SonarScanner
