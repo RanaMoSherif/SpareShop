@@ -20,10 +20,16 @@ jobs:
       # Then simply use the dotnet container as you'd expect and run your tests
       - run:
           # Update this line with the directory that contains your tests project file
-          working_directory: ~/project/App.Tests
-          name: Run tests
+          working_directory: ~/BestAuto.API
+          name: dotnet restore
           command: |
-            dotnet test
+            dotnet restore
+      - run:
+          # Update this line with the directory that contains your tests project file
+          working_directory: ~/BestAuto.API
+          name: dotnet publish
+          command: |
+            dotnet publish -c Release -o out
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
