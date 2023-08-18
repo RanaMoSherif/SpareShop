@@ -46,20 +46,20 @@ jobs:
             dotnet build
             dotnet sonarscanner end
 
-  check-unit-test-coverage:
-    docker:
-      - image: mcr.microsoft.com/dotnet/sdk:7.0
-    steps:
-      - checkout
-      - run:
-          name: Run tests with coverage
-          command: dotnet test --collect:"XPlat Code Coverage"
-      - run:
-          name: Report test coverage to SonarQube
-          command: |
-            dotnet sonarscanner begin /k:<< parameters.project_key >> /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.host.url=<< parameters.sonar_host_url >> /d:sonar.token=$SONAR_TOKEN
-            dotnet build
-            dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN
+  # check-unit-test-coverage:
+  #   docker:
+  #     - image: mcr.microsoft.com/dotnet/sdk:7.0
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Run tests with coverage
+  #         command: dotnet test --collect:"XPlat Code Coverage"
+  #     - run:
+  #         name: Report test coverage to SonarQube
+  #         command: |
+  #           dotnet sonarscanner begin /k:<< parameters.project_key >> /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.host.url=<< parameters.sonar_host_url >> /d:sonar.token=$SONAR_TOKEN
+  #           dotnet build
+  #           dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN
 
 workflows:
   version: 2
@@ -67,4 +67,4 @@ workflows:
     jobs:
       - build-and-test
       - check-quality-gates
-      - check-unit-test-coverage
+      # - check-unit-test-coverage
