@@ -35,13 +35,6 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet publish $SLN_FILE -c Release -o out
-      - sonarcloud-dotnet/setup-sonar
-      # - sonarcloud-dotnet/run-scan
-      - sonarcloud-dotnet/check-quality-gate
-      - sonarcloud-dotnet/end-scan
-
-orbs:
-  sonarcloud-dotnet: ksmc/sonarcloud-dotnet@0.0.44
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
@@ -49,5 +42,4 @@ workflows:
   sample: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - build-and-test:
-          context: sonarcloud
+      - build-and-test
