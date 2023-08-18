@@ -35,10 +35,12 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet publish $SLN_FILE -c Release -o out
-      - sonarcloud/scan
+      - dotnet-sonarscanner/sonar-install
+      - dotnet-sonarscanner/sonar-begin
+      - dotnet-sonarscanner/sonar-end
 
 orbs:
-  sonarcloud: sonarsource/sonarcloud@1.1.0
+  sonarcloud: storytel/dotnet-sonarscanner@1.4.3
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
