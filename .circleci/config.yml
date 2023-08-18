@@ -1,6 +1,7 @@
-version: 2.1
+  version: 2.1
 
-jobs:
+  jobs:
+    build:
   build-and-test:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
@@ -22,16 +23,33 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet publish $SLN_FILE -c Release -o out
-      - dotnet-sonarscanner/sonar-install
-      - dotnet-sonarscanner/sonar-begin
-      - dotnet-sonarscanner/sonar-end
+      - run: dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+      - run: echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
+      #- run: echo "deb http://ftp.us.debian.org/debian stretch main contrib non-free" >> /etc/apt/sources.list
+      - run: echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
+      - run: apt update
+      - run: apt install -y unzip
+      # Install JAVA 11
+      - run: mkdir -p /usr/share/man/man1 # FIX https://github.com/geerlingguy/ansible-role-java/issues/64
+      - run: apt install -y openjdk-11-jdk
+      # # BEGIN Dependencies for RocksDB
+      # - run: apt install -y libc6-dev libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev
+      # - run: apt install -y bzip2 lz4 librocksdb-dev 
+      # # END Dependencies for RocksDB
+      - run: set JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+      - run: export JAVA_HOME
+      - run:
+          name: Run sonarscanner
+          command: |
+            SLN_FILE=$(find . -name "*.sln")
+            echo "Found solution file: $SLN_FILE"
+            dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:RanaMoSherif_SpareShop /d:sonar.login=${SONAR_TOKEN} /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
+      - run: dotnet build
+      # - run: dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
+      - run: dotnet sonarscanner end /d:sonar.login=${SONAR_TOKEN}
 
-orbs:
-  dotnet-sonarscanner: storytel/dotnet-sonarscanner@1.4.3
-
-workflows:
-  version: 2
-  sample:
-    jobs:
-      - build-and-test:
-          context: dotnet-sonarscanner
+  workflows:
+    main:
+      jobs:
+        - build:
+            context: SonarCloud
