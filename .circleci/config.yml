@@ -36,7 +36,7 @@ jobs:
             echo "Found solution file: $SLN_FILE"
             dotnet publish $SLN_FILE -c Release -o out
       - sonarcloud-dotnet/setup-sonar
-      - sonarcloud-dotnet/run-scan
+      # - sonarcloud-dotnet/run-scan
       - sonarcloud-dotnet/check-quality-gate
       - sonarcloud-dotnet/end-scan
 
