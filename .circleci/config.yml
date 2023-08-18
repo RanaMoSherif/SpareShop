@@ -42,9 +42,9 @@ jobs:
       - run:
           name: Begin SonarQube analysis
           command: |
-            dotnet sonarscanner begin /k:<< parameters.project_key >> /d:sonar.host.url=<< parameters.sonar_host_url >> /d:sonar.token=$SONAR_TOKEN
+            dotnet sonarscanner begin
             dotnet build
-            dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN
+            dotnet sonarscanner end
 
   check-unit-test-coverage:
     docker:
