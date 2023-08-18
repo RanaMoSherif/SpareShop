@@ -7,13 +7,13 @@
       resource_class: small
       steps:
         - checkout
-        - run:
-            name: dotnet restore & Publish
-            command: |
-              SLN_FILE=$(find . -name "*.sln")
-              echo "Found solution file: $SLN_FILE"
-              dotnet restore $SLN_FILE
-              dotnet publish $SLN_FILE -c Release -o out
+        # - run:
+        #     name: dotnet restore & Publish
+        #     command: |
+        #       SLN_FILE=$(find . -name "*.sln")
+        #       echo "Found solution file: $SLN_FILE"
+        #       dotnet restore $SLN_FILE
+        #       dotnet publish $SLN_FILE -c Release -o out
 
         - run:
             name: Install dotnet-sonarscanner
