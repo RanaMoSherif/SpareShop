@@ -1,13 +1,5 @@
 version: 2.1
 
-parameters:
-  project_key:
-    type: string
-    default: "RanaMoSherif_SpareShop"
-  sonar_host_url:
-    type: string
-    default: "https://sonarcloud.io"
-
 jobs:
   build-and-test:
     docker:
@@ -30,41 +22,16 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet publish $SLN_FILE -c Release -o out
+      - dotnet-sonarscanner/sonar-install
+      - dotnet-sonarscanner/sonar-begin
+      - dotnet-sonarscanner/sonar-end
 
-  check-quality-gates:
-    docker:
-      - image: mcr.microsoft.com/dotnet/sdk:7.0
-    steps:
-      - checkout
-      - run:
-          name: Install SonarScanner
-          command: dotnet tool install --global dotnet-sonarscanner
-      - run:
-          name: Begin SonarQube analysis
-          command: |
-            dotnet sonarscanner begin
-            dotnet build
-            dotnet sonarscanner end
-
-  # check-unit-test-coverage:
-  #   docker:
-  #     - image: mcr.microsoft.com/dotnet/sdk:7.0
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Run tests with coverage
-  #         command: dotnet test --collect:"XPlat Code Coverage"
-  #     - run:
-  #         name: Report test coverage to SonarQube
-  #         command: |
-  #           dotnet sonarscanner begin /k:<< parameters.project_key >> /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.host.url=<< parameters.sonar_host_url >> /d:sonar.token=$SONAR_TOKEN
-  #           dotnet build
-  #           dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN
+orbs:
+  dotnet-sonarscanner: storytel/dotnet-sonarscanner@1.4.3
 
 workflows:
   version: 2
   sample:
     jobs:
       - build-and-test
-      - check-quality-gates
-      # - check-unit-test-coverage
+          context: dotnet-sonarscanner
