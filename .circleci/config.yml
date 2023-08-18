@@ -40,7 +40,7 @@ jobs:
       - dotnet-sonarscanner/sonar-end
 
 orbs:
-  sonarcloud: storytel/dotnet-sonarscanner@1.4.3
+  dotnet-sonarscanner: storytel/dotnet-sonarscanner@1.4.3
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
