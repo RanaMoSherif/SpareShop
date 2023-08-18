@@ -1,24 +1,18 @@
 version: 2.1
 
 parameters:
-  docker_image:
+  project_key:
     type: string
-    default: "mcr.microsoft.com/dotnet/sdk:7.0"
-  resource_class:
+    default: "RanaMoSherif_SpareShop"
+  sonar_host_url:
     type: string
-    default: "small"
-  sonar_project_key:
-    type: string
-    default: "your_project_key"
-  coverage_file:
-    type: string
-    default: "path_to_your_coverage_report.xml"
+    default: "https://sonarcloud.io"
 
 jobs:
   build-and-test:
     docker:
-      - image: << pipeline.parameters.docker_image >>
-    resource_class: << pipeline.parameters.resource_class >>
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
+    resource_class: small
     steps:
       - checkout
       - run:
@@ -36,29 +30,39 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet publish $SLN_FILE -c Release -o out
+
   check-quality-gates:
     docker:
-      - image: << pipeline.parameters.docker_image >>
-    resource_class: << pipeline.parameters.resource_class >>
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
     steps:
+      - checkout
       - run:
-          name: Check Quality Gates
+          name: Install SonarScanner
+          command: dotnet tool install --global dotnet-sonarscanner
+      - run:
+          name: Begin SonarQube analysis
           command: |
-            sonar-scanner begin /k:<< pipeline.parameters.sonar_project_key >>
+            dotnet sonarscanner begin /k:<< parameters.project_key >> /d:sonar.host.url=<< parameters.sonar_host_url >> /d:sonar.token=$SONAR_TOKEN
             dotnet build
-            dotnet test
-            sonar-scanner end
+            dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN
+
   check-unit-test-coverage:
     docker:
-      - image: << pipeline.parameters.docker_image >>
-    resource_class: << pipeline.parameters.resource_class >>
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
     steps:
+      - checkout
       - run:
-          name: Check Unit Test Coverage
+          name: Run tests with coverage
+          command: dotnet test --collect:"XPlat Code Coverage"
+      - run:
+          name: Report test coverage to SonarQube
           command: |
-            reportgenerator "-reports:<< pipeline.parameters.coverage_file >>" "-targetdir:coverage_report" "-reporttypes:HTMLInline;HTMLChart"
+            dotnet sonarscanner begin /k:<< parameters.project_key >> /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.host.url=<< parameters.sonar_host_url >> /d:sonar.token=$SONAR_TOKEN
+            dotnet build
+            dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN
 
 workflows:
+  version: 2
   sample:
     jobs:
       - build-and-test
