@@ -37,7 +37,7 @@
               dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
               dotnet build
               # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
-              dotnet sonarscanner end /d:sonar.token=$SONAR_TOKEN_VAR
+              dotnet sonarscanner end
 
   workflows:
       main:
