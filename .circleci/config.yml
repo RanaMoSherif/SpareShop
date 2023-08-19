@@ -14,6 +14,8 @@
         #       echo "Found solution file: $SLN_FILE"
         #       dotnet restore $SLN_FILE
         #       dotnet publish $SLN_FILE -c Release -o out
+      - setup_remote_docker:
+          docker_layer_caching: true
 
         - run:
             name: Install dotnet-sonarscanner
