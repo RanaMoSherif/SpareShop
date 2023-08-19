@@ -14,7 +14,7 @@ commands:
       - run:
           name: "Docker: Building"
           command: |
-            docker build -t ranasherif/spareshop:latest ./spareshop
+            docker build -t ranasherif/spareshop:latest .
             echo $CIRCLE_PROJECT_REPONAME
   docker-login:
     steps:
