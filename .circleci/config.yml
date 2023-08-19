@@ -14,7 +14,7 @@ commands:
       - run:
           name: "Docker: Building"
           command: |
-            docker build -t ranasherif/spareshop:latest .
+            docker build -t ranasherif/spareshop:latest ./BestAuto.API
             echo $CIRCLE_PROJECT_REPONAME
   docker-login:
     steps:
