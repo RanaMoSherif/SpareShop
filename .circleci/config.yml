@@ -14,8 +14,8 @@
         #       echo "Found solution file: $SLN_FILE"
         #       dotnet restore $SLN_FILE
         #       dotnet publish $SLN_FILE -c Release -o out
-      - setup_remote_docker:
-          docker_layer_caching: true
+        - setup_remote_docker:
+            docker_layer_caching: true
 
         - run:
             name: Install dotnet-sonarscanner
@@ -32,13 +32,13 @@
         - run:
             name: Run SonarScanner
             command: |
-              dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.host.url=https://sonarcloud.io /d:sonar.login=${SONAR_TOKEN} /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
+              dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.host.url=https://sonarcloud.io /d:sonar.token=${SONAR_TOKEN} /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
               dotnet build
               # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
         - run:
             name: Run SonarScanner
             command: |
-              dotnet sonarscanner end /d:sonar.login=${SONAR_TOKEN}
+              dotnet sonarscanner end /d:sonar.token=${SONAR_TOKEN}
 
   workflows:
       main:
