@@ -17,7 +17,7 @@ commands:
             pwd
             ls
             cd "BestAuto.API"
-            docker build -t ranasherif/spareshop:latest ./BestAuto.API
+            docker build -t ranasherif/spareshop:latest .
             echo $CIRCLE_PROJECT_REPONAME
   docker-login:
     steps:
