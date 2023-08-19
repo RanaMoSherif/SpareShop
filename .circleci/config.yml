@@ -39,7 +39,7 @@
         - run:
             name: Run SonarScanner Push Results
             command: |
-              dotnet sonarscanner end
+              dotnet sonarscanner end /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.host.url=https://sonarcloud.io
 
   workflows:
       main:
