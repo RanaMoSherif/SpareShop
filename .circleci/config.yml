@@ -37,9 +37,9 @@
               dotnet build
               # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
         - run:
-            name: Run SonarScanner
+            name: Run SonarScanner Push Results
             command: |
-              dotnet sonarscanner end /d:sonar.token=${SONAR_TOKEN}
+              dotnet sonarscanner end
 
   workflows:
       main:
