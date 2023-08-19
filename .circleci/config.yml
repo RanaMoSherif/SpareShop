@@ -3,7 +3,7 @@ version: 2.1
 executors:
   docker_image:
     docker:
-      - image: cimg/base
+      - image: cimg/base:current
   dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
