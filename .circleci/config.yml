@@ -42,8 +42,8 @@
         #     command: |
         #       dotnet sonarscanner end
 
-orbs:
-  sonarcloud: sonarsource/sonarcloud@2.0.0
+  orbs:
+      sonarcloud: sonarsource/sonarcloud@2.0.0
 
   workflows:
       main:
