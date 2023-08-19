@@ -6,42 +6,47 @@
         - image: mcr.microsoft.com/dotnet/sdk:7.0
       resource_class: small
       steps:
-        - checkout
+        # - checkout
+        - sonarcloud/scan
         - setup_remote_docker:
             docker_layer_caching: true
 
-        - run:
-            name: dotnet restore & Publish
-            command: |
-              SLN_FILE=$(find . -name "*.sln")
-              echo "Found solution file: $SLN_FILE"
-              dotnet restore $SLN_FILE
-              dotnet publish $SLN_FILE -c Release -o out
+        # - run:
+        #     name: dotnet restore & Publish
+        #     command: |
+        #       SLN_FILE=$(find . -name "*.sln")
+        #       echo "Found solution file: $SLN_FILE"
+        #       dotnet restore $SLN_FILE
+        #       dotnet publish $SLN_FILE -c Release -o out
 
-        - run:
-            name: Install dotnet-sonarscanner
-            command: |
-              dotnet tool install --global dotnet-sonarscanner --version 5.11.0
-              echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
+        # - run:
+        #     name: Install dotnet-sonarscanner
+        #     command: |
+        #       dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+        #       echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
               
-        - run:
-            name: Install Openjdk for SonarScanner
-            command: |
-              # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
-              apt update && apt install -y openjdk-17-jdk && set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/ && export JAVA_HOME
+        # - run:
+        #     name: Install Openjdk for SonarScanner
+        #     command: |
+        #       # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
+        #       apt update && apt install -y openjdk-17-jdk && set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/ && export JAVA_HOME
 
-        - run:
-            name: Run SonarScanner
-            command: |
-              dotnet sonarscanner begin /key:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
-              dotnet build
-              # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
-        - run:
-            name: Run SonarScanner Push Results
-            command: |
-              dotnet sonarscanner end
+        # - run:
+        #     name: Run SonarScanner
+        #     command: |
+        #       dotnet sonarscanner begin /key:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
+        #       dotnet build
+        #       # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
+        # - run:
+        #     name: Run SonarScanner Push Results
+        #     command: |
+        #       dotnet sonarscanner end
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@2.0.0
 
   workflows:
       main:
         jobs:
           - build
+              context: sonarcloud
