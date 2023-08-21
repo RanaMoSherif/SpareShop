@@ -1,101 +1,96 @@
 version: 2.1
 
-executors:
-  docker_image:
-    docker:
-      - image: cimg/base:current
-  dotnet:
-    docker:
-      - image: mcr.microsoft.com/dotnet/sdk:7.0
-
-commands:
-  docker-build:
-    steps:
-      - run:
-          name: "Docker: Building"
-          command: |
-            pwd
-            ls
-            cd "BestAuto.API"
-            docker build -t ranasherif/spareshop:latest .
-            echo $CIRCLE_PROJECT_REPONAME
-  docker-login:
-    steps:
-      - run:
-          name: "Docker: Logging in"
-          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
-  docker-push:
-    steps:
-      - run:
-          name: "Docker: Push"
-          command: |
-            docker build -t RanaMoSherif/$CIRCLE_PROJECT_REPONAME:${CIRCLE_TAG:1} -t RanaMoSherif/$CIRCLE_PROJECT_REPONAME:latest ./$CIRCLE_PROJECT_REPONAME
-            docker push RanaMoSherif/$CIRCLE_PROJECT_REPONAME:${CIRCLE_TAG:1}
-            docker push RanaMoSherif/$CIRCLE_PROJECT_REPONAME:latest
-
 jobs:
-  test:
-    executor: dotnet
+  build:
+    docker:
+      - image: docker:20.10.7
     steps:
       - checkout
-      - run:
-          name: Install Java for SonarCloud Scanner
-          command: |
-            mkdir -p /usr/share/man/man1
-            curl -s https://deb.nodesource.com/setup_16.x | bash
-            apt update -y
-            apt install default-jdk -y
-            apt install nodejs -y
-      - run:
-          name: Run SonarCloud Scanner
-          command: |
-            export PATH="$PATH:/root/.dotnet/tools"
-            dotnet tool install --global dotnet-sonarscanner
-            dotnet restore
-            dotnet-sonarscanner begin /k:"RanaMoSherif_$CIRCLE_PROJECT_REPONAME" /n:"$CIRCLE_PROJECT_REPONAME" /o:"RanaMoSherif-github" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN" /d:sonar.exclusions="wwwroot\lib\**\*,"
-            dotnet msbuild /t:Rebuild
-            dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
-  build-docker:
-    executor: docker_image
-    steps:
       - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: |
+            docker build -t spareshop:latest .
+      - run:
+          name: Save Docker Image
+          command: |
+            mkdir -p docker-cache
+            docker save -o docker-cache/spareshop.tar spareshop:latest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docker-cache
+
+  test:
+    docker:
+      - image: docker:20.10.7
+    steps:
+      - attach_workspace:
+          at: /workspace
+      - setup_remote_docker
+      - run:
+          name: Load Docker Image
+          command: |
+            docker load -i /workspace/docker-cache/spareshop.tar
+      - run:
+          name: Test
+          command: |
+            docker run --rm -v "$(pwd):/app" spareshop:latest dotnet test
+
+  deploy:
+    docker:
+      - image: docker:20.10.7
+    steps:
+      - attach_workspace:
+          at: /workspace
+      - setup_remote_docker
+      - run:
+          name: Load Docker Image
+          command: |
+            docker load -i /workspace/docker-cache/spareshop.tar
+      - run:
+          name: Deploy
+          command: |
+            # Your deployment script here
+
+  tag-and-push:
+    docker:
+      - image: cimg/base:2023.08
+    steps:
       - checkout
-      - docker-build
-      - docker-login
+      - setup_remote_docker
+      - run:
+          name: Load Docker Image
+          command: |
+            docker load -i docker-cache/spareshop.tar
+      - run:
+          name: Login to GHCR
+          command: |
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
+      - run:
+          name: Tag and Push Docker Image
+          command: |
+            CALVER_TAG="$(date +"%Y.%m.%d")-$(echo "${CIRCLE_BRANCH}" | tr '/' '-')"
+            docker tag spareshop:latest ghcr.io/${GHCR_USERNAME}/spareshop:${CALVER_TAG}
+            docker push ghcr.io/${GHCR_USERNAME}/spareshop:${CALVER_TAG}
+      - run:
+          name: Tag Git Repository
+          command: |
+            git config --global user.email "you@example.com"
+            git config --global user.name "Your Name"
+            git tag "${CALVER_TAG}"
+            git push origin "${CALVER_TAG}"
 
 workflows:
-  test-and-deploy:
+  build-test-deploy:
     jobs:
+      - build
       - test:
-          context: RanaMoSherif
-          filters:
-            tags:
-              only: /^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
-            branches:
-              ignore: /.*/
-      - build-docker:
-          name: docker-build-push
-          context: RanaMoSherif
-          filters:
-            tags:
-              only: /^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
-            branches:
-              ignore: /.*/
+          requires:
+            - build
+      - deploy:
           requires:
             - test
-          # post-steps:
-          #   - docker-push
-
-  test:
-    jobs:
-      - test:
-          context: RanaMoSherif
-          filters:
-            tags:
-              ignore: /^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
-      - build-docker:
-          name: docker-build
-          context: RanaMoSherif
-          filters:
-            tags:
-              ignore: /^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
+      - tag-and-push:
+          requires:
+            - test
