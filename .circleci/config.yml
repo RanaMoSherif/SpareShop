@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  sonarcloud: sonarsource/sonarcloud@1.1.0
-
 jobs:
   build:
     docker:
@@ -23,25 +20,28 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
-      - run:
-          name: Find .sln file and run dotnet publish
-          command: |
-            SLN_FILE=$(find . -name "*.sln")
-            dotnet publish $SLN_FILE -c Release -o out
+            dotnet build
+            # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
+      # - run:
+      #     name: Find .sln file and run dotnet publish
+      #     command: |
+      #       SLN_FILE=$(find . -name "*.sln")
+      #       dotnet publish $SLN_FILE -c Release -o out
       - run:
           name: Install dotnet-sonarscanner
           command: |
             dotnet tool install --global dotnet-sonarscanner --version 5.11.0
             echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
-      - run:
-          name: Run sonarscanner
-          command: |
-            SLN_FILE=$(find . -name "*.sln")
-            echo "Found solution file: $SLN_FILE"
-            dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.token=${SONAR_TOKEN} /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
-            dotnet build
-            # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
-            dotnet sonarscanner end /d:sonar.token=${SONAR_TOKEN}
+      # - run:
+      #     name: Run sonarscanner
+      #     command: |
+      #       SLN_FILE=$(find . -name "*.sln")
+      #       echo "Found solution file: $SLN_FILE"
+      #       dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.token=${SONAR_TOKEN} /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
+      #       dotnet build
+      #       # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
+      #       dotnet sonarscanner end /d:sonar.token=${SONAR_TOKEN}
+      - sonarcloud/scan
 
   build-docker:
     docker:
@@ -121,6 +121,9 @@ jobs:
             git config --global user.name "Your Name"
             git tag "${CALVER_TAG}"
             git push origin "${CALVER_TAG}"
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@2.0.0
 
 workflows:
   build-test-deploy:
