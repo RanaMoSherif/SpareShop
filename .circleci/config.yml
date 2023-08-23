@@ -6,6 +6,32 @@ orbs:
 jobs:
   build:
     docker:
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Install unzip
+          command: apt-get update && apt-get install -y unzip
+      - run:
+          name: Find .sln file and run dotnet restore
+          command: |
+            SLN_FILE=$(find . -name "*.sln")
+            echo "Found solution file: $SLN_FILE"
+            dotnet restore $SLN_FILE
+      - run:
+          name: Find .sln file and run dotnet publish
+          command: |
+            SLN_FILE=$(find . -name "*.sln")
+            dotnet publish $SLN_FILE -c Release -o out
+      - run:
+          name: Install dotnet-sonarscanner
+          command: |
+            dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+            echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
+
+  build-docker:
+    docker:
       - image: docker:20.10.7
     steps:
       - checkout
@@ -15,12 +41,6 @@ jobs:
           command: |
             docker build -t spareshop:latest .
       - run:
-          name: Install unzip JAVA 
-          command: |
-              apt-get update && apt-get install -y unzip openjdk-17-jdk
-              set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
-              export JAVA_HOME
-      - run:
           name: Save Docker Image
           command: |
             mkdir -p docker-cache
@@ -29,8 +49,6 @@ jobs:
           root: .
           paths:
             - docker-cache
-      - sonarcloud/scan
-
   # test:
   #   docker:
   #     - image: docker:20.10.7
@@ -95,10 +113,13 @@ workflows:
   build-test-deploy:
     jobs:
       - build
+      - build-docker
       # - test:
       #     requires:
       #       - build
+      - tag-and-push:
+          requires:
+            - build-docker
       - deploy:
           requires:
-            - build
-      - tag-and-push
+            - tag-and-push
