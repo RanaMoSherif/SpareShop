@@ -9,7 +9,7 @@ jobs:
       - run:
           name: Install unzip & Java
           command: | 
-            apt-get update && apt-get install -y unzip openjdk-17-jdk
+            apt-get update && apt-get install -y unzip openjdk-17-jdk Node.js npm
             set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
             mkdir -p /usr/share/man/man1
             export JAVA_HOME
