@@ -10,7 +10,7 @@ jobs:
           name: Install unzip & Java
           command: | 
             wget -qO- https://deb.nodesource.com/setup_18.x | bash -
-            apt-get update && apt-get install -y unzip openjdk-17-jdk Node.js npm
+            apt-get update && apt-get install -y unzip openjdk-17-jdk Node.js
             set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
             mkdir -p /usr/share/man/man1
             export JAVA_HOME
