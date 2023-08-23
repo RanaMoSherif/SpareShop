@@ -11,8 +11,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install unzip
-          command: apt-get update && apt-get install -y unzip
+          name: Install unzip & Java
+          command: | 
+            apt-get update && apt-get install -y unzip openjdk-17-jdk
+            set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
+            mkdir -p /usr/share/man/man1
+            export JAVA_HOME
       - run:
           name: Find .sln file and run dotnet restore
           command: |
@@ -29,15 +33,6 @@ jobs:
           command: |
             dotnet tool install --global dotnet-sonarscanner --version 5.11.0
             echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
-      - run:
-          name: Install JAVA
-          command: |
-            # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
-            # apt update
-            apt install -y openjdk-17-jdk
-            set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
-            export JAVA_HOME
-#        - run: mkdir -p /usr/share/man/man1
       - run:
           name: Run sonarscanner
           command: |
