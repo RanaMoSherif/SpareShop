@@ -69,8 +69,11 @@ jobs:
           name: Tag Docker Image and Push to Docker Hub
           command: |
             echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
+            echo "Start tag"
             docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
+            echo "Start push"
             docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+            echo "End push"
 
 workflows:
   build-test-tag-deploy:
