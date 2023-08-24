@@ -46,6 +46,10 @@ jobs:
           command: |
             docker load -i /workspace/docker-cache/spareshop.tar
       - run:
+          name: Install Git
+          command: |
+            apk update && apk add git && git --version
+      - run:
           name: Get CALVER_TAG
           command: |
             export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
@@ -54,7 +58,6 @@ jobs:
       # - run:
       #     name: Tag Git Repository
       #     command: |
-      #       apk update && apk add git && git --version
       #       git config --global user.email "ranasherif447@gmail.com"
       #       git config --global user.name "RanaMoSherif"
       #       git tag "${CALVER_TAG}"
