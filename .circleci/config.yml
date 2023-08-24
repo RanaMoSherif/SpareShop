@@ -78,7 +78,8 @@ workflows:
   build-test-tag-deploy:
     jobs:
       # - build
-      - build-docker
+      - build-docker:
+          context: Docker
       - tag-and-push:
           requires:
             - build-docker
