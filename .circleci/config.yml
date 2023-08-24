@@ -25,7 +25,8 @@ jobs:
           command: |
             docker build -t spareshop:latest .
             apk update
-            apk add git & git --version
+            apk add git
+            git --version
       - run:
           name: Save Docker Image
           command: |
