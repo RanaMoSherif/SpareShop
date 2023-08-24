@@ -78,7 +78,7 @@ jobs:
             echo "Start tag"
             docker tag spareshop:latest ranasherif/spareshop:dev
             echo "Start push"
-            docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+            docker push ranasherif/spareshop:dev
 
 workflows:
   build-test-tag-deploy:
