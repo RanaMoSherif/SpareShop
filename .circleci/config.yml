@@ -86,7 +86,15 @@ jobs:
             git config --global user.email "ranasherif447@gmail.com"
             git config --global user.name "RanaMoSherif"
             git tag ${CALVER_TAG}
-      #     git push origin ${CALVER_TAG}
+
+            # Check if the current branch has an upstream branch
+            UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null)
+            if [ $? -ne 0 ]; then
+                # Set the upstream branch if it doesn't exist
+                git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)
+            fi
+            
+            git push origin ${CALVER_TAG}
       # - run:
       #     name: Tag Docker Image and Push to Amazon ECR
       #     command: |
@@ -96,6 +104,7 @@ jobs:
       - run:
           name: Tag Docker Image and Push to Docker Hub
           command: |
+            echo ${CALVER_TAG}
             echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
             echo "Start tag"
             docker tag spareshop:latest ${DOCKER_USER}/spareshop:dev
