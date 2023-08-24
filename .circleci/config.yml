@@ -86,8 +86,8 @@ jobs:
             git config --global user.email "ranasherif447@gmail.com"
             git config --global user.name "RanaMoSherif"
             git tag ${CALVER_TAG}
-            git push --set-upstream origin ${BRANCH_NAME}
-            git push origin ${CALVER_TAG}
+      #     git push --set-upstream origin ${BRANCH_NAME}
+      #     git push origin ${CALVER_TAG}
       # - run:
       #     name: Tag Docker Image and Push to Amazon ECR
       #     command: |
