@@ -71,7 +71,7 @@ jobs:
             echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
             echo "Start tag"
             export DOCKER_USERNAME=${DOCKER_USER}
-            docker tag spareshop:latest ranasherif/spareshop:${CALVER_TAG}
+            docker tag spareshop:latest ranasherif/spareshop:$(date +"%Y.%m.%d")-$(git rev-parse --abbrev-ref HEAD)
             echo "Start push"
             docker push ${DOCKER_USERNAME}/spareshop:${CALVER_TAG}
             echo "End push"
