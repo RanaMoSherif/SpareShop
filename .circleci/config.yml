@@ -23,8 +23,6 @@ jobs:
       - run:
           name: Build Docker Image
           command: |
-            echo ${DOCKER_PASS}
-            echo ${DOCKER_USER}
             docker build -t spareshop:latest .
       - run:
           name: Save Docker Image
@@ -78,8 +76,8 @@ workflows:
   build-test-tag-deploy:
     jobs:
       # - build
-      - build-docker:
-          context: Docker
+      - build-docker
       - tag-and-push:
+          context: Docker
           requires:
             - build-docker
