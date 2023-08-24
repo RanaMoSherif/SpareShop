@@ -58,14 +58,13 @@ jobs:
             export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}
             echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
             echo ${CALVER_TAG}
-      # - run:
-      #     name: Tag Git Repository
-      #     command: |
-      #       apk update && apk add git && git --version
-      #       git config --global user.email "ranasherif447@gmail.com"
-      #       git config --global user.name "RanaMoSherif"
-      #       git tag "${CALVER_TAG}"
-      #       git push origin "${CALVER_TAG}"
+      - run:
+          name: Tag Git Repository
+          command: |
+            git config --global user.email "ranasherif447@gmail.com"
+            git config --global user.name "RanaMoSherif"
+            git tag "${CALVER_TAG}"
+            git push origin "${CALVER_TAG}"
       # - run:
       #     name: Tag Docker Image and Push to Amazon ECR
       #     command: |
