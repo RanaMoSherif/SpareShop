@@ -24,6 +24,7 @@ jobs:
           name: Build Docker Image
           command: |
             docker build -t spareshop:latest .
+            cat /etc/*-release
             apt update & apt install git & git --version
       - run:
           name: Save Docker Image
