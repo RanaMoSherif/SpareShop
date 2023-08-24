@@ -16,9 +16,10 @@ jobs:
 
   build-docker:
     docker:
-      - image: cimg/base:2023.08
+      - image: docker:20.10.23
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Build Docker Image
           command: |
@@ -28,66 +29,33 @@ jobs:
           command: |
             mkdir -p docker-cache
             docker save -o docker-cache/spareshop.tar spareshop:latest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docker-cache
+
+  tag-and-push:
+    docker:
+      - image: docker:20.10.23
+    steps:
+      - attach_workspace:
+          at: /workspace
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Load Docker Image
+          command: |
+            docker load -i /workspace/docker-cache/spareshop.tar
       - run:
           name: Get CALVER_TAG
           command: |
             export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
             export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}
             echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-      - run:
-          name: Tag Docker Image and Push to Docker Hub
-          command: |
-            echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
-            echo "Start tag"
-            docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
-            echo "Start push"
-            docker push ${DOCKER_USERNAME}/spareshop:${CALVER_TAG}
-            echo "End push"
-
-  # build-docker:
-  #   docker:
-  #     - image: cimg/base:2023.08
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Build Docker Image
-  #         command: |
-  #           docker build -t spareshop:latest .
-  #     - run:
-  #         name: Save Docker Image
-  #         command: |
-  #           mkdir -p docker-cache
-  #           docker save -o docker-cache/spareshop.tar spareshop:latest
-  #     - run:
-  #         name: Get CALVER_TAG
-  #         command: |
-  #           export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-  #           export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}
-  #           echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-  #     - persist_to_workspace:
-  #         root: .
-  #         paths:
-  #           - docker-cache
-
-  tag-and-push:
-    docker:
-      - image: cimg/base:2023.08
-    steps:
-      - attach_workspace:
-          at: /workspace
-      - setup_remote_docker
-      - run:
-          name: Load Docker Image
-          command: |
-            docker load -i /workspace/docker-cache/spareshop.tar
-      - run:
-          name: Install Git
-          command: |
-            apk update && apk add git && git --version
-
       # - run:
       #     name: Tag Git Repository
       #     command: |
+      #       apk update && apk add git && git --version
       #       git config --global user.email "ranasherif447@gmail.com"
       #       git config --global user.name "RanaMoSherif"
       #       git tag "${CALVER_TAG}"
@@ -103,11 +71,9 @@ jobs:
           command: |
             echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
             echo "Start tag"
-            export DOCKER_USERNAME=${DOCKER_USER}
-            docker tag spareshop:latest ranasherif/spareshop:$(date +"%Y.%m.%d")-$(git rev-parse --abbrev-ref HEAD)
+            docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
             echo "Start push"
-            docker push ${DOCKER_USERNAME}/spareshop:${CALVER_TAG}
-            echo "End push"
+            docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
 
 workflows:
   build-test-tag-deploy:
