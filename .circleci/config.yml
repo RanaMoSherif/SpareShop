@@ -13,7 +13,30 @@ jobs:
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
             dotnet build
-
+  test:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Install sonarscanner 
+          command: |
+            apt-get update && apt-get install -y openjdk-17-jdk-headless
+            set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
+            export JAVA_HOME
+            dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+            echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
+      - run:
+          name: Run sonarscanner
+          command: |
+            SLN_FILE=$(find . -name "*.sln")
+            echo "Found solution file: $SLN_FILE"
+            dotnet restore $SLN_FILE
+            dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
+            dotnet build
+            # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
+            dotnet sonarscanner end /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f
   build-docker:
     docker:
       - image: docker:20.10.23
@@ -82,7 +105,8 @@ jobs:
 workflows:
   build-test-tag-deploy:
     jobs:
-      # - build
+      - build
+      - test
       - build-docker
       - tag-and-push:
           context: Docker
