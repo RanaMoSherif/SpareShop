@@ -76,9 +76,9 @@ jobs:
           command: |
             echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
             echo "Start tag"
-            docker tag spareshop:latest ranasherif/spareshop:dev
+            docker tag spareshop:latest ${DOCKER_USER}/spareshop:dev
             echo "Start push"
-            docker push ranasherif/spareshop:dev
+            docker push ${DOCKER_USER}/spareshop:dev
 
 workflows:
   build-test-tag-deploy:
