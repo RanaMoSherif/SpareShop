@@ -7,47 +7,39 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install unzip
-          command: apt-get update && apt-get install -y unzip
-      - run:
-          name: Find .sln file and run dotnet restore
+          name: build
           command: |
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
+            dotnet build
+  test:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
+    resource_class: small
+    steps:
+      - checkout
       - run:
-          name: Find .sln file and run dotnet publish
+          name: Install sonarscanner 
           command: |
-            SLN_FILE=$(find . -name "*.sln")
-            dotnet publish $SLN_FILE -c Release -o out
-      - run:
-          name: Install dotnet-sonarscanner
-          command: |
-            dotnet tool install --global dotnet-sonarscanner --version 5.11.0
-            echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
-      - run:
-          name: Install JAVA
-          command: |
-            # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
-            # apt update
-            apt install -y openjdk-17-jdk
+            apt-get update && apt-get install -y openjdk-17-jdk-headless
             set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
             export JAVA_HOME
-      - run: mkdir -p /usr/share/man/man1
+            dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+            echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
       - run:
           name: Run sonarscanner
           command: |
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
+            dotnet restore $SLN_FILE
             dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
             dotnet build
             # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
             dotnet sonarscanner end /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f
-
-
   build-docker:
     docker:
-      - image: docker:20.10.7
+      - image: docker:20.10.23
     steps:
       - checkout
       - setup_remote_docker
@@ -64,25 +56,10 @@ jobs:
           root: .
           paths:
             - docker-cache
-  # test:
-  #   docker:
-  #     - image: docker:20.10.7
-  #   steps:
-  #     - attach_workspace:
-  #         at: /workspace
-  #     - setup_remote_docker
-  #     - run:
-  #         name: Load Docker Image
-  #         command: |
-  #           docker load -i /workspace/docker-cache/spareshop.tar
-  #     - run:
-  #         name: Test
-  #         command: |
-  #           docker run --rm -v "$(pwd):/app" spareshop:latest dotnet test
 
-  deploy:
+  tag-and-push:
     docker:
-      - image: docker:20.10.7
+      - image: docker:20.10.23
     steps:
       - attach_workspace:
           at: /workspace
@@ -91,55 +68,51 @@ jobs:
           name: Load Docker Image
           command: |
             docker load -i /workspace/docker-cache/spareshop.tar
-      - run:
-          name: Deploy
-          command: |
-            # Your deployment script here
-
-  tag-and-push:
-    docker:
-      - image: cimg/base:2023.08
-    steps:
       - checkout
-      - setup_remote_docker
       - run:
-          name: Load Docker Image
+          name: Install Git
           command: |
-            docker load -i docker-cache/spareshop.tar
+            apk update && apk add git && git --version
       - run:
-          name: Login to GHCR
+          name: Get CALVER_TAG
           command: |
-            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
-      - run:
-          name: Tag and Push Docker Image
-          command: |
-            CALVER_TAG="$(date +"%Y.%m.%d")-$(echo "${CIRCLE_BRANCH}" | tr '/' '-')"
-            docker tag spareshop:latest ghcr.io/${GHCR_USERNAME}/spareshop:${CALVER_TAG}
-            docker push ghcr.io/${GHCR_USERNAME}/spareshop:${CALVER_TAG}
+            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}
+            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
       - run:
           name: Tag Git Repository
           command: |
-            git config --global user.email "you@example.com"
-            git config --global user.name "Your Name"
-            git tag "${CALVER_TAG}"
-            git push origin "${CALVER_TAG}"
-
-orbs:
-  sonarcloud: sonarsource/sonarcloud@2.0.0
+            echo ${CALVER_TAG}
+            git config --global user.email "ranasherif447@gmail.com"
+            git config --global user.name "RanaMoSherif"
+            git tag ${CALVER_TAG}
+      #     git push --set-upstream origin ${BRANCH_NAME}
+      #     git push origin ${CALVER_TAG}
+      # - run:
+      #     name: Tag Docker Image and Push to Amazon ECR
+      #     command: |
+      #       docker tag spareshop:latest <ECR_REPOSITORY_URL>:${CALVER_TAG}
+      #       $(aws ecr get-login --no-include-email --region <REGION>)
+      #       docker push <ECR_REPOSITORY_URL>:${CALVER_TAG}
+      - run:
+          name: Tag Docker Image and Push to Docker Hub
+          command: |
+            echo ${CALVER_TAG}
+            echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
+            echo "Start tag"
+            docker tag spareshop:latest ${DOCKER_USER}/spareshop:dev
+            echo "Start push"
+            docker push ${DOCKER_USER}/spareshop:dev
 
 workflows:
-  build-test-deploy:
+  build-test-tag-deploy:
     jobs:
       - build
-          # environment:
-          #   SONARQUBE_SCANNER_PARAMS: '{"sonar.host.url":"https://sonarcloud.io", "sonar.projectKey":"RanaMoSherif_SpareShop","sonar.organization":"ranamosherif"}'
+      - test
       - build-docker
-      # - test:
-      #     requires:
-      #       - build
       - tag-and-push:
+          context: Docker
           requires:
+            - build
+            - test
             - build-docker
-      - deploy:
-          requires:
-            - tag-and-push
