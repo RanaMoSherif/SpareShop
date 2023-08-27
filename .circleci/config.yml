@@ -45,7 +45,7 @@ jobs:
       - store_test_results:
           path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
       - store_artifacts:
-          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
+          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
 
   build-docker:
     docker:
