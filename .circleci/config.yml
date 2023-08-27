@@ -43,9 +43,9 @@ jobs:
               dotnet tool install --global trx2junit
               trx2junit TestResults.trx
       - store_test_results:
-          path: ./TestResults.xml
+          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
       - store_artifacts:
-          path: ./TestResults.xml
+          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
 
   build-docker:
     docker:
