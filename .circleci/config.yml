@@ -83,25 +83,26 @@ jobs:
           name: Install Git
           command: |
             apk update && apk add git && git --version
-      - run:
-          name: Get CALVER_TAG
-          command: |
-            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-            export COMMIT_HASH=$(git rev-parse --short HEAD)
-            export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
-            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-      - run:
-          name: Tag Git Repository
-          command: |
-            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-            export COMMIT_HASH=$(git rev-parse --short HEAD)
-            export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
-            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-            git config --global user.email "ranasherif447@gmail.com"
-            git config --global user.name "RanaMoSherif"
-            git tag ${CALVER_TAG}
-            git push --set-upstream origin ${BRANCH_NAME}
-            git push origin ${CALVER_TAG}
+      # - run:
+      #     name: Get CALVER_TAG
+      #     command: |
+      #       export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+      #       export COMMIT_HASH=$(git rev-parse --short HEAD)
+      #       export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
+      #       echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
+      # - run:
+      #     name: Tag Git Repository
+      #     command: |
+      #       export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+      #       export COMMIT_HASH=$(git rev-parse --short HEAD)
+      #       export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
+      #       echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
+      #       git config --global user.email "ranasherif447@gmail.com"
+      #       git config --global user.name "RanaMoSherif"
+      #       git tag ${CALVER_TAG}
+      #       git push --set-upstream origin ${BRANCH_NAME}
+      #       git push origin ${CALVER_TAG}
+
       # - run:
       #     name: Tag Docker Image and Push to Amazon ECR
       #     command: |
@@ -122,6 +123,8 @@ jobs:
             docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
             echo "Start push"
             docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+orbs:
+  gh: circleci/github-cli@1.0
 
 workflows:
   build-test-tag-deploy:
@@ -135,3 +138,17 @@ workflows:
             - build
             - test
             - build-docker
+            
+      - gh/release:
+          notes-file: changelog.md
+          tag: 1.0.0
+          title: The initial release
+          requires:
+            - node/test
+          context:
+            - GITHUB_CREDS
+          filters:
+            branches:
+              only:
+                - main
+
