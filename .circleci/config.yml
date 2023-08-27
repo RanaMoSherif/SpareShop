@@ -139,14 +139,14 @@ workflows:
             - test
             - build-docker
             
-      - gh/release:
-          # notes-file: changelog.md
-          tag: 1.0.0
-          title: The initial release
-          context:
-            - GITHUB_CREDS
-          # filters:
-          #   branches:
-          #     only:
-          #       - main
+      # - gh/release:
+      #     # notes-file: changelog.md
+      #     tag: 1.0.0
+      #     title: The initial release
+      #     context:
+      #       - GITHUB_CREDS
+      #     # filters:
+      #     #   branches:
+      #     #     only:
+      #     #       - main
 
