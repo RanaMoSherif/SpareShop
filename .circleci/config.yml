@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  build-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
     resource_class: small
@@ -13,7 +13,7 @@ jobs:
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
             dotnet build
-  test:
+  unit-test-and-analyze-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
     resource_class: small
@@ -47,7 +47,7 @@ jobs:
       - store_artifacts:
           path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
 
-  build-docker:
+  build-docker-image:
     docker:
       - image: docker:20.10.23
     steps:
@@ -67,7 +67,7 @@ jobs:
           paths:
             - docker-cache
 
-  tag-and-push:
+  tag-docker-and-push:
     docker:
       - image: docker:20.10.23
     steps:
@@ -127,17 +127,17 @@ orbs:
   gh: circleci/github-cli@1.0
 
 workflows:
-  build-test-tag-deploy:
+  dotnet-pipeline-flow:
     jobs:
-      - build
-      - test
-      - build-docker
-      - tag-and-push:
+      - build-dotnet
+      - unit-test-and-analyze-dotnet
+      - build-docker-image
+      - tag-docker-and-push:
           context: Docker
           requires:
-            - build
-            - test
-            - build-docker
+            - build-dotnet
+            - unit-test-and-analyze-dotnet
+            - build-docker-image
             
       # - gh/release:
       #     # notes-file: changelog.md
