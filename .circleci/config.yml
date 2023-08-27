@@ -1,53 +1,152 @@
-  version: 2.1
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: build
+          command: |
+            SLN_FILE=$(find . -name "*.sln")
+            echo "Found solution file: $SLN_FILE"
+            dotnet restore $SLN_FILE
+            dotnet build
+  test:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Install sonarscanner 
+          command: |
+            apt-get update && apt-get install -y openjdk-17-jdk-headless
+            set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
+            export JAVA_HOME
+            dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+            echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
+      - run:
+          name: Run sonarscanner
+          command: |
+            SLN_FILE=$(find . -name "*.sln")
+            echo "Found solution file: $SLN_FILE"
+            dotnet restore $SLN_FILE
+            dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
+            dotnet build
+            dotnet test --no-restore --no-build --verbosity normal -f net7.0 --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
+            dotnet sonarscanner end /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f
+      - run:
+          name: Convert TRX to JUnit
+          command: |
+              dotnet tool install --global trx2junit
+              trx2junit /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
+      - store_test_results:
+          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
+      - store_artifacts:
+          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
 
-  jobs:
-    build:
-      docker:
-        - image: mcr.microsoft.com/dotnet/sdk:7.0
-      resource_class: small
-      steps:
-        - checkout
-        - run:
-            name: Install unzip
-            command: apt-get update && apt-get install -y unzip
-        - run:
-            name: Find .sln file and run dotnet restore
-            command: |
-              SLN_FILE=$(find . -name "*.sln")
-              echo "Found solution file: $SLN_FILE"
-              dotnet restore $SLN_FILE
-        - run:
-            name: Find .sln file and run dotnet publish
-            command: |
-              SLN_FILE=$(find . -name "*.sln")
-              dotnet publish $SLN_FILE -c Release -o out
-        - run:
-            name: Install dotnet-sonarscanner
-            command: |
-              dotnet tool install --global dotnet-sonarscanner --version 5.11.0
-              echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
+  build-docker:
+    docker:
+      - image: docker:20.10.23
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: |
+            docker build -t spareshop:latest .
+      - run:
+          name: Save Docker Image
+          command: |
+            mkdir -p docker-cache
+            docker save -o docker-cache/spareshop.tar spareshop:latest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docker-cache
 
-        - run:
-            name: Install JAVA
-            command: |
-              # echo "deb http://ftp.debian.org/debian stable main contrib non-free" >> /etc/apt/sources.list
-              # apt update
-              apt install -y openjdk-17-jdk
-              set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
-              export JAVA_HOME
-#        - run: mkdir -p /usr/share/man/man1
-        - run:
-            name: Run sonarscanner
-            command: |
-              SLN_FILE=$(find . -name "*.sln")
-              echo "Found solution file: $SLN_FILE"
-              dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.login=${SONAR_TOKEN} /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs"
-              dotnet build
-              # dotnet test --no-restore --no-build --verbosity normal -f net6.0 --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover test/TESTPROJECT.csproj
-              dotnet sonarscanner end /d:sonar.login=${SONAR_TOKEN}
+  tag-and-push:
+    docker:
+      - image: docker:20.10.23
+    steps:
+      - attach_workspace:
+          at: /workspace
+      - setup_remote_docker
+      - run:
+          name: Load Docker Image
+          command: |
+            docker load -i /workspace/docker-cache/spareshop.tar
+      - checkout
+      - run:
+          name: Install Git
+          command: |
+            apk update && apk add git && git --version
+      # - run:
+      #     name: Get CALVER_TAG
+      #     command: |
+      #       export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+      #       export COMMIT_HASH=$(git rev-parse --short HEAD)
+      #       export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
+      #       echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
+      # - run:
+      #     name: Tag Git Repository
+      #     command: |
+      #       export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+      #       export COMMIT_HASH=$(git rev-parse --short HEAD)
+      #       export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
+      #       echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
+      #       git config --global user.email "ranasherif447@gmail.com"
+      #       git config --global user.name "RanaMoSherif"
+      #       git tag ${CALVER_TAG}
+      #       git push --set-upstream origin ${BRANCH_NAME}
+      #       git push origin ${CALVER_TAG}
 
-  workflows:
-      main:
-        jobs:
-          - build:
-              context: SonarCloud
+      # - run:
+      #     name: Tag Docker Image and Push to Amazon ECR
+      #     command: |
+      #       docker tag spareshop:latest <ECR_REPOSITORY_URL>:${CALVER_TAG}
+      #       $(aws ecr get-login --no-include-email --region <REGION>)
+      #       docker push <ECR_REPOSITORY_URL>:${CALVER_TAG}
+      - run:
+          name: Tag Docker Image and Push to Docker Hub
+          command: |
+            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            export COMMIT_HASH=$(git rev-parse --short HEAD)
+            export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
+            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
+
+            echo ${CALVER_TAG}
+            echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
+            echo "Start tag"
+            docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
+            echo "Start push"
+            docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+orbs:
+  gh: circleci/github-cli@1.0
+
+workflows:
+  build-test-tag-deploy:
+    jobs:
+      - build
+      - test
+      - build-docker
+      - tag-and-push:
+          context: Docker
+          requires:
+            - build
+            - test
+            - build-docker
+            
+      # - gh/release:
+      #     # notes-file: changelog.md
+      #     tag: 1.0.0
+      #     title: The initial release
+      #     context:
+      #       - GITHUB_CREDS
+      #     # filters:
+      #     #   branches:
+      #     #     only:
+      #     #       - main
+
