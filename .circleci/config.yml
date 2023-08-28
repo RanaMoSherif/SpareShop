@@ -124,7 +124,7 @@ jobs:
             echo "Start push"
             docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
 orbs:
-  github-cli: circleci/github-cli@2.2.0
+  github-release: circleci/github-cli@2.2.0
   
 workflows:
   dotnet-pipeline-flow:
@@ -142,7 +142,7 @@ workflows:
             - build-dotnet
             - unit-test-and-analyze-dotnet
             - build-docker-image
-      - gh/release:
+      - github-release:
           tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
           title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
           requires:
