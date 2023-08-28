@@ -130,8 +130,12 @@ workflows:
   dotnet-pipeline-flow:
     jobs:
       - build-dotnet
-      - unit-test-and-analyze-dotnet
-      - build-docker-image
+      - unit-test-and-analyze-dotnet:
+          requires:
+            - build-dotnet
+      - build-docker-image:
+          requires:
+            - build-dotnet
       - tag-docker-and-push:
           context: Docker
           requires:
