@@ -114,7 +114,7 @@ jobs:
           command: |
             export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
             export COMMIT_HASH=$(git rev-parse --short HEAD)
-            export CALVER_TAG=$(date +"%Y.%m.%d)-${BRANCH_NAME}-${COMMIT_HASH}
+            export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}-${COMMIT_HASH}
             echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
 
             echo ${CALVER_TAG}
