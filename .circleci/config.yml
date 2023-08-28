@@ -146,7 +146,7 @@ workflows:
           tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
           title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
           requires:
-            - tag-docker-and-push
+            - build-dotnet
           context:
             - GITHUB_CREDS
 
