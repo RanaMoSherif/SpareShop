@@ -123,8 +123,19 @@ jobs:
             docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
             echo "Start push"
             docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+  deploy-to-ecs:
+    executor: aws-ecs/default
+    steps:
+      - checkout
+      - aws-ecs/deploy-service-update:
+          family: <YOUR_TASK_DEFINITION_NAME>
+          cluster-name: <YOUR_CLUSTER_NAME>
+          service-name: <YOUR_SERVICE_NAME>
+          container-image-name-updates: "container=<YOUR_CONTAINER_NAME>,image=${DOCKER_USER}/spareshop:${CALVER_TAG}"
+
 orbs:
   gh: circleci/github-cli@2.2.0
+  aws-ecs: circleci/aws-ecs@4.0.0
 
 workflows:
   dotnet-pipeline-flow:
@@ -149,4 +160,8 @@ workflows:
             - build-dotnet
           context:
             - GITHUB_CREDS
+      - deploy-to-ecs:
+          context: AWS
+          requires:
+            - tag-docker-and-push
 
