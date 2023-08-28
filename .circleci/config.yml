@@ -124,8 +124,8 @@ jobs:
             echo "Start push"
             docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
 orbs:
-  gh: circleci/github-cli@1.0
-
+  github-cli: circleci/github-cli@2.2.0
+  
 workflows:
   dotnet-pipeline-flow:
     jobs:
