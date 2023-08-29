@@ -154,8 +154,10 @@ workflows:
             - unit-test-and-analyze-dotnet
             - build-docker-image
       - gh/release:
-          tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
-          title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
+          # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
+          # title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
+          tag: 1.1.0
+          title: "Add Feature: Blinking text"
           requires:
             - build-dotnet
           context:
