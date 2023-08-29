@@ -96,8 +96,8 @@ jobs:
             rm gh-cli.deb
       - run:
           name: Authenticate with GitHub CLI
-          environment:
-            GH_TOKEN: "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"
+          # environment:
+          #   GH_TOKEN: "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"
           command: |
             #!/bin/bash
             # # echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
