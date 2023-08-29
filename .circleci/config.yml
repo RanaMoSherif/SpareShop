@@ -104,6 +104,9 @@ jobs:
             echo $GH_TOKEN
             echo $PARAM_GH_TOKEN
             gh auth login --hostname "GitHub.com"
+          environment:
+            PARAM_GH_TOKEN: "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"
+
       - run:
           name: Create GitHub Release with Debug Logging
           command: |
@@ -182,8 +185,6 @@ workflows:
             - unit-test-and-analyze-dotnet
             - build-docker-image
       - manual-gh-release:
-          environment:
-            PARAM_GH_TOKEN: "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"
           context:
             - GITHUB_CREDS
           # requires:
