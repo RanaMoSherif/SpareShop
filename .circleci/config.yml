@@ -97,8 +97,8 @@ jobs:
       - run:
           name: Authenticate with GitHub CLI
           command: |
-            echo $GITHUB_CREDS
-            echo $GITHUB_CREDS | gh auth login --with-token
+            echo $GITHUB_TOKEN
+            echo $GITHUB_TOKEN | gh auth login --with-token
       - run:
           name: Create GitHub Release with Debug Logging
           command: |
