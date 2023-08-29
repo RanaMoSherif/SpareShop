@@ -97,8 +97,12 @@ jobs:
       - run:
           name: Authenticate with GitHub CLI
           command: |
+            #!/bin/bash
+            echo "export GH_TOKEN=\"${GITHUB_TOKEN}\"" >>"$BASH_ENV"
+            [ -z "$GITHUB_TOKEN" ] && echo "A GitHub token must be supplied. Check the \"token\" parameter." && exit 1
+            echo "export GITHUB_TOKEN=\"${GITHUB_TOKEN}\"" >>"$BASH_ENV"
             echo $GITHUB_TOKEN
-            echo $GITHUB_TOKEN | gh auth login --with-token
+            gh auth login
       - run:
           name: Create GitHub Release with Debug Logging
           command: |
