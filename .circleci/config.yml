@@ -12,7 +12,7 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
-            dotnet build
+            dotnet build 
   unit-test-and-analyze-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
