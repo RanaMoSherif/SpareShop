@@ -97,8 +97,8 @@ jobs:
       - run:
           name: Authenticate with GitHub CLI
           command: |
-            echo "export GITHUB_TOKEN=$GITHUB_CREDS" >> $BASH_ENV
-            gh auth login --with-token <<< $GITHUB_TOKEN
+            echo $GITHUB_CREDS
+            echo $GITHUB_CREDS | gh auth login --with-token
       - run:
           name: Create GitHub Release with Debug Logging
           command: |
@@ -182,15 +182,15 @@ workflows:
           # requires:
           #   - build-dotnet
 
-      - gh/release:
-          # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
-          # title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
-          tag: 1.1.0
-          title: "Add Feature: Blinking text"
-          requires:
-            - build-dotnet
-          context:
-            - GITHUB_CREDS
+      # - gh/release:
+      #     # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
+      #     # title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
+      #     tag: 1.1.0
+      #     title: "Add Feature: Blinking text"
+      #     requires:
+      #       - build-dotnet
+      #     context:
+      #       - GITHUB_CREDS
       # - deploy-to-ecs:
       #     context: AWS
       #     requires:
