@@ -96,6 +96,8 @@ jobs:
             rm gh-cli.deb
       - run:
           name: Authenticate with GitHub CLI
+          environment:
+            GH_TOKEN: "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"
           command: |
             #!/bin/bash
             # echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
@@ -104,8 +106,6 @@ jobs:
             echo $GH_TOKEN
             echo $PARAM_GH_TOKEN
             gh auth login --hostname "GitHub.com"
-          environment:
-            PARAM_GH_TOKEN: "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"
 
       - run:
           name: Create GitHub Release with Debug Logging
