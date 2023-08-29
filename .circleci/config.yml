@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  build-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
     resource_class: small
@@ -13,7 +13,7 @@ jobs:
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
             dotnet build
-  test:
+  unit-test-and-analyze-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
     resource_class: small
@@ -47,7 +47,7 @@ jobs:
       - store_artifacts:
           path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
 
-  build-docker:
+  build-docker-image:
     docker:
       - image: docker:20.10.23
     steps:
@@ -67,7 +67,7 @@ jobs:
           paths:
             - docker-cache
 
-  tag-and-push:
+  tag-docker-and-push:
     docker:
       - image: docker:20.10.23
     steps:
@@ -114,7 +114,7 @@ jobs:
           command: |
             export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
             export COMMIT_HASH=$(git rev-parse --short HEAD)
-            export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
+            export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}-${COMMIT_HASH}
             echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
 
             echo ${CALVER_TAG}
@@ -123,30 +123,47 @@ jobs:
             docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
             echo "Start push"
             docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+  # deploy-to-ecs:
+  #   executor: aws-ecs/default
+  #   steps:
+  #     - checkout
+  #     - aws-ecs/deploy_service_update:
+  #         family: <YOUR_TASK_DEFINITION_NAME>
+  #         cluster-name: <YOUR_CLUSTER_NAME>
+  #         service-name: <YOUR_SERVICE_NAME>
+  #         container-image-name-updates: "container=<YOUR_CONTAINER_NAME>,image=${DOCKER_USER}/spareshop:${CALVER_TAG}"
+
 orbs:
-  gh: circleci/github-cli@1.0
+  gh: circleci/github-cli@2.2.0
+  aws-ecs: circleci/aws-ecs@4.0.0
 
 workflows:
-  build-test-tag-deploy:
+  dotnet-pipeline-flow:
     jobs:
-      - build
-      - test
-      - build-docker
-      - tag-and-push:
+      - build-dotnet
+      - unit-test-and-analyze-dotnet:
+          requires:
+            - build-dotnet
+      - build-docker-image:
+          requires:
+            - build-dotnet
+      - tag-docker-and-push:
           context: Docker
           requires:
-            - build
-            - test
-            - build-docker
-            
-      # - gh/release:
-      #     # notes-file: changelog.md
-      #     tag: 1.0.0
-      #     title: The initial release
-      #     context:
-      #       - GITHUB_CREDS
-      #     # filters:
-      #     #   branches:
-      #     #     only:
-      #     #       - main
+            - build-dotnet
+            - unit-test-and-analyze-dotnet
+            - build-docker-image
+      - gh/release:
+          # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
+          # title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
+          tag: 1.1.0
+          title: "Add Feature: Blinking text"
+          requires:
+            - build-dotnet
+          context:
+            - GITHUB_CREDS
+      # - deploy-to-ecs:
+      #     context: AWS
+      #     requires:
+      #       - tag-docker-and-push
 
