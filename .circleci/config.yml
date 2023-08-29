@@ -106,7 +106,7 @@ jobs:
             # echo $GH_TOKEN
             # echo $PARAM_GH_TOKEN
             echo "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" | gh auth login --with-token
-            gh auth login --hostname "GitHub.com"
+            # gh auth login --hostname "GitHub.com"
 
       - run:
           name: Create GitHub Release with Debug Logging
