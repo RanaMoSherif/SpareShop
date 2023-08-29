@@ -98,10 +98,11 @@ jobs:
           name: Authenticate with GitHub CLI
           command: |
             #!/bin/bash
-            echo "export GH_TOKEN=\"${GITHUB_TOKEN}\"" >>"$BASH_ENV"
-            [ -z "$GITHUB_TOKEN" ] && echo "A GitHub token must be supplied. Check the \"token\" parameter." && exit 1
-            echo "export GITHUB_TOKEN=\"${GITHUB_TOKEN}\"" >>"$BASH_ENV"
-            echo $GITHUB_TOKEN
+            # echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
+            [ -z "$GH_TOKEN" ] && echo "A GitHub token must be supplied. Check the \"token\" parameter." && exit 1
+            echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
+            echo $GH_TOKEN
+            echo $PARAM_GH_TOKEN
             gh auth login --hostname "GitHub.com"
       - run:
           name: Create GitHub Release with Debug Logging
@@ -181,6 +182,8 @@ workflows:
             - unit-test-and-analyze-dotnet
             - build-docker-image
       - manual-gh-release:
+          environment:
+            PARAM_GH_TOKEN: "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"
           context:
             - GITHUB_CREDS
           # requires:
