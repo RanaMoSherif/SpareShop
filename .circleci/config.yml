@@ -83,6 +83,29 @@ jobs:
           name: Install Git
           command: |
             apk update && apk add git && git --version
+  manual-gh-release:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Install GitHub CLI
+          command: |
+            curl -sSL "https://github.com/cli/cli/releases/download/v2.3.0/gh_2.3.0_linux_amd64.deb" -o "gh-cli.deb"
+            sudo apt install ./gh-cli.deb
+            rm gh-cli.deb
+      - run:
+          name: Authenticate with GitHub CLI
+          command: |
+            echo "export GITHUB_TOKEN=$GITHUB_CREDS" >> $BASH_ENV
+            gh auth login --with-token <<< $GITHUB_TOKEN
+      - run:
+          name: Create GitHub Release with Debug Logging
+          command: |
+            gh release create --debug 1.1.0 \
+              --title "Add Feature: Blinking text" \
+              --notes-file changelog.md
+
       # - run:
       #     name: Get CALVER_TAG
       #     command: |
@@ -134,7 +157,7 @@ jobs:
   #         container-image-name-updates: "container=<YOUR_CONTAINER_NAME>,image=${DOCKER_USER}/spareshop:${CALVER_TAG}"
 
 orbs:
-  gh: circleci/github-cli@2.2.0
+  # gh: circleci/github-cli@2.2.0
   aws-ecs: circleci/aws-ecs@4.0.0
 
 workflows:
@@ -153,6 +176,12 @@ workflows:
             - build-dotnet
             - unit-test-and-analyze-dotnet
             - build-docker-image
+      - manual-gh-release:
+          context:
+            - GITHUB_CREDS
+          # requires:
+          #   - build-dotnet
+
       - gh/release:
           # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
           # title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
