@@ -109,7 +109,7 @@ jobs:
             # export GH_TOKEN
             # source ~/.bashrc
             # echo $GH_TOKEN | gh auth login --with-token
-            echo "export GH_TOKEN=\"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\"" >> ~/.bashrc
+            # echo "export GH_TOKEN=\"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\"" >> ~/.bashrc
             # gh auth login
             echo "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" > mytoken.txt
             
