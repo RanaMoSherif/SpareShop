@@ -111,7 +111,7 @@ jobs:
             # echo $GH_TOKEN | gh auth login --with-token
             echo "export GH_TOKEN=\"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\"" >> ~/.bashrc
             # gh auth login
-            gh auth login --with-token < $GH_TOKEN
+            gh auth login --with-token < ${GH_TOKEN}
             # gh auth login --hostname "GitHub.com"
       - run:
           name: Create GitHub Release with Debug Logging
