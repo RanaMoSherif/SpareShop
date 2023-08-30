@@ -105,7 +105,12 @@ jobs:
             # echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
             # echo $GH_TOKEN
             # echo $PARAM_GH_TOKEN
-            echo "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" | gh auth login --with-token
+            # set GH_TOKEN "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"
+            # export GH_TOKEN
+            # source ~/.bashrc
+            # echo $GH_TOKEN | gh auth login --with-token
+            echo "export GH_TOKEN=\"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\"" >> ~/.bashrc
+            echo $GH_TOKEN | gh auth login --with-token
             # gh auth login --hostname "GitHub.com"
       - run:
           name: Create GitHub Release with Debug Logging
