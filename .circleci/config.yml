@@ -83,6 +83,21 @@ jobs:
           name: Install Git
           command: |
             apk update && apk add git && git --version
+      - run:
+          name: Tag Docker Image and Push to Docker Hub
+          command: |
+            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            export COMMIT_HASH=$(git rev-parse --short HEAD)
+            export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}-${COMMIT_HASH}
+            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
+
+            echo ${CALVER_TAG}
+            echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
+            echo "Start tag"
+            docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
+            echo "Start push"
+            docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
+            
   manual-gh-release:
     docker:
       - image: cimg/base:stable
@@ -148,20 +163,7 @@ jobs:
       #       docker tag spareshop:latest <ECR_REPOSITORY_URL>:${CALVER_TAG}
       #       $(aws ecr get-login --no-include-email --region <REGION>)
       #       docker push <ECR_REPOSITORY_URL>:${CALVER_TAG}
-      - run:
-          name: Tag Docker Image and Push to Docker Hub
-          command: |
-            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-            export COMMIT_HASH=$(git rev-parse --short HEAD)
-            export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}-${COMMIT_HASH}
-            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
 
-            echo ${CALVER_TAG}
-            echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
-            echo "Start tag"
-            docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
-            echo "Start push"
-            docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}
   # deploy-to-ecs:
   #   executor: aws-ecs/default
   #   steps:
@@ -192,11 +194,11 @@ workflows:
             - build-dotnet
             - unit-test-and-analyze-dotnet
             - build-docker-image
-      - manual-gh-release:
-          context:
-            - GITHUB_CREDS
-          # requires:
-          #   - build-dotnet
+      # - manual-gh-release:
+      #     context:
+      #       - GITHUB_CREDS
+      #     # requires:
+      #     #   - build-dotnet
 
       # - gh/release:
       #     # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
