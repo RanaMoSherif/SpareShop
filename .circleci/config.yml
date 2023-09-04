@@ -195,7 +195,7 @@ workflows:
             - build-dotnet
             - unit-test-and-analyze-dotnet
             - build-docker-image
-      - aws-ecr/build-and-push-image:
+      - build-and-push-image:
           context: aws-dev
           create-repo: true
           dockerfile: Dockerfile
