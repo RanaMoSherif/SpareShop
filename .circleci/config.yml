@@ -177,7 +177,7 @@ jobs:
 orbs:
   # gh: circleci/github-cli@2.2.0
   aws-ecs: circleci/aws-ecs@4.0.0
-  aws-ecr: circleci/aws-ecr@9.0.0
+  aws-ecr: circleci/aws-ecr@8.1.3
 
 workflows:
   dotnet-pipeline-flow:
@@ -195,7 +195,7 @@ workflows:
             - build-dotnet
             - unit-test-and-analyze-dotnet
             - build-docker-image
-      - build-and-push-image:
+      - aws-ecr/build-and-push-image:
           context: aws-dev
           create-repo: true
           dockerfile: Dockerfile
