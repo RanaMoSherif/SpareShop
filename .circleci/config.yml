@@ -201,7 +201,7 @@ workflows:
           dockerfile: Dockerfile
           path: .
           repo: dev-testci-service
-          tag: "latest"
+          tag: '$CIRCLE_SHA1,latest'
 
       # - manual-gh-release:
       #     context:
