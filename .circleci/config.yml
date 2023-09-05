@@ -203,6 +203,7 @@ workflows:
           repo: dev-testci-service
           tag: '1.0.0-alpha'
       - aws-ecs/deploy-service-update:
+          context: aws-dev
           requires:
             - aws-ecr/build-and-push-image # only run this job once aws-ecr/build-and-push-image has completed
           family: "dev-testci-service"
