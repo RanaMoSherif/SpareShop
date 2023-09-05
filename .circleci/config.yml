@@ -201,15 +201,13 @@ workflows:
           dockerfile: Dockerfile
           path: .
           repo: dev-testci-service
-          tag: 'latest'
+          tag: '1.0.0-alpha'
       - aws-ecs/deploy-service-update:
           requires:
             - aws-ecr/build-and-push-image # only run this job once aws-ecr/build-and-push-image has completed
           family: "dev-testci-service"
           cluster: "revamp-stg-cluster"
-          container-image-name-updates: "container=dev-testci-service,tag=latest"
-
-
+          container-image-name-updates: "container=dev-testci-service,tag=1.0.0-alpha"
 
       # - manual-gh-release:
       #     context:
