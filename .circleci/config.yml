@@ -201,7 +201,7 @@ workflows:
           dockerfile: Dockerfile
           path: .
           repo: dev-testci-service
-          tag: "1.0.11"
+          tag: "latest"
 
       # - manual-gh-release:
       #     context:
