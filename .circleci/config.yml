@@ -206,7 +206,7 @@ workflows:
           context: aws-dev
           # requires:
           #   - aws-ecr/build-and-push-image # only run this job once aws-ecr/build-and-push-image has completed
-          family: "TestCi-service"
+          family: "dev-testci-service"
           cluster: "revamp-stg-cluster"
           container-image-name-updates: "container=testci-service,tag=latest"
 
