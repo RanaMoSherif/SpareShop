@@ -205,7 +205,7 @@ workflows:
           requires:
             - build-dotnet
             - unit-test-and-analyze-dotnet
-            - build-docker-image
+            # - build-docker-image
       - aws-ecs/deploy-service-update:
           context: aws-dev
           # requires:
