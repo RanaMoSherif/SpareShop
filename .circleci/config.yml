@@ -189,12 +189,12 @@ workflows:
       - build-docker-image:
           requires:
             - build-dotnet
-      - tag-docker-and-push:
-          context: Docker
-          requires:
-            - build-dotnet
-            - unit-test-and-analyze-dotnet
-            - build-docker-image
+      # - tag-docker-and-push:
+      #     context: Docker
+      #     requires:
+      #       - build-dotnet
+      #       - unit-test-and-analyze-dotnet
+      #       - build-docker-image
       - aws-ecr/build-and-push-image:
           context: aws-dev
           create-repo: false
@@ -203,7 +203,9 @@ workflows:
           repo: dev-testci-service
           tag: 'latest'
           requires:
-            - tag-docker-and-push
+            - build-dotnet
+            - unit-test-and-analyze-dotnet
+            - build-docker-image
       - aws-ecs/deploy-service-update:
           context: aws-dev
           # requires:
