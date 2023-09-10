@@ -212,7 +212,7 @@ workflows:
           #   - aws-ecr/build-and-push-image # only run this job once aws-ecr/build-and-push-image has completed
           family: "dev-testci-service"
           cluster: "revamp-stg-cluster"
-          container-image-name-updates: "container=testci-service,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          container-image-name-updates: "container=dev-testci-service,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - aws-ecr/build-and-push-image
 
