@@ -201,7 +201,7 @@ workflows:
           dockerfile: Dockerfile
           path: .
           repo: dev-testci-service
-          tag: 'latest'
+          tag: "$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             # - build-dotnet
             - unit-test-and-analyze-dotnet
