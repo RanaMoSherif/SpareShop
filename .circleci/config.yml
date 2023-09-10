@@ -186,9 +186,9 @@ workflows:
       - unit-test-and-analyze-dotnet:
           requires:
             - build-dotnet
-      - build-docker-image:
-          requires:
-            - build-dotnet
+      # - build-docker-image:
+      #     requires:
+      #       - build-dotnet
       # - tag-docker-and-push:
       #     context: Docker
       #     requires:
