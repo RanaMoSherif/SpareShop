@@ -182,26 +182,26 @@ orbs:
 workflows:
   dotnet-pipeline-flow:
     jobs:
-      # - build-dotnet
-      # - unit-test-and-analyze-dotnet:
-      #     requires:
-      #       - build-dotnet
-      # - build-docker-image:
-      #     requires:
-      #       - build-dotnet
-      # - tag-docker-and-push:
-      #     context: Docker
-      #     requires:
-      #       - build-dotnet
-      #       - unit-test-and-analyze-dotnet
-      #       - build-docker-image
-      # - aws-ecr/build-and-push-image:
-      #     context: aws-dev
-      #     create-repo: false
-      #     dockerfile: Dockerfile
-      #     path: .
-      #     repo: dev-testci-service
-      #     tag: '1.0.0-alpha'
+      - build-dotnet
+      - unit-test-and-analyze-dotnet:
+          requires:
+            - build-dotnet
+      - build-docker-image:
+          requires:
+            - build-dotnet
+      - tag-docker-and-push:
+          context: Docker
+          requires:
+            - build-dotnet
+            - unit-test-and-analyze-dotnet
+            - build-docker-image
+      - aws-ecr/build-and-push-image:
+          context: aws-dev
+          create-repo: false
+          dockerfile: Dockerfile
+          path: .
+          repo: dev-testci-service
+          tag: 'latest'
       - aws-ecs/deploy-service-update:
           context: aws-dev
           # requires:
