@@ -202,6 +202,8 @@ workflows:
           path: .
           repo: dev-testci-service
           tag: 'latest'
+          requires:
+            - tag-docker-and-push
       - aws-ecs/deploy-service-update:
           context: aws-dev
           # requires:
@@ -209,6 +211,8 @@ workflows:
           family: "dev-testci-service"
           cluster: "revamp-stg-cluster"
           container-image-name-updates: "container=testci-service,tag=latest"
+          requires:
+            - aws-ecr/build-and-push-image
 
       # - manual-gh-release:
       #     context:
