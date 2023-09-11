@@ -16,7 +16,7 @@ parameters:
   dotnet_version: 
     default: "7.0"
     type: string
-  repo: 
+  repo_service_name: 
     default: "dev-testci-service"
     type: string
   family: 
@@ -95,14 +95,14 @@ workflows:
           create-repo: false
           dockerfile: Dockerfile
           path: .
-          repo: << pipeline.parameters.repo >>
-          tag: << pipeline.parameters.container_image_name_updates >>
+          repo: << pipeline.parameters.repo_service_name >>
+          tag: "container=<< pipeline.parameters.repo_service_name >>,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - test-dotnet
       - aws-ecs/deploy-service-update:
           context: aws-dev
-          family: << pipeline.parameters.family >>
+          family: << pipeline.parameters.repo_service_name >>
           cluster: << pipeline.parameters.cluster >> 
-          container-image-name-updates: << pipeline.parameters.container_image_name_updates >>
+          container-image-name-updates: "container=<< pipeline.parameters.repo_service_name >>,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - aws-ecr/build-and-push-image
