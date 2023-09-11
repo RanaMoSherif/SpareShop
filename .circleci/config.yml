@@ -87,6 +87,7 @@ workflows:
     jobs:
       - build-dotnet
       - test-dotnet:
+          context: SonarCloud
           requires:
             - build-dotnet
       - aws-ecr/build-and-push-image:
