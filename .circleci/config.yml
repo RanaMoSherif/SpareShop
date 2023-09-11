@@ -13,7 +13,7 @@ jobs:
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
             dotnet build 
-  unit-test-and-analyze-dotnet:
+  test-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
     resource_class: small
@@ -38,7 +38,7 @@ jobs:
             dotnet test --no-restore --no-build --verbosity normal -f net7.0 --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
             dotnet sonarscanner end /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f
       - run:
-          name: Convert TRX to JUnit
+          name: Convert TRX to JUnit to show in CircleCI tests
           command: |
               dotnet tool install --global trx2junit
               trx2junit /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
@@ -47,135 +47,7 @@ jobs:
       - store_artifacts:
           path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
 
-  build-docker-image:
-    docker:
-      - image: docker:20.10.23
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Build Docker Image
-          command: |
-            docker build -t spareshop:latest .
-      - run:
-          name: Save Docker Image
-          command: |
-            mkdir -p docker-cache
-            docker save -o docker-cache/spareshop.tar spareshop:latest
-      - persist_to_workspace:
-          root: .
-          paths:
-            - docker-cache
-
-  tag-docker-and-push:
-    docker:
-      - image: docker:20.10.23
-    steps:
-      - attach_workspace:
-          at: /workspace
-      - setup_remote_docker
-      - run:
-          name: Load Docker Image
-          command: |
-            docker load -i /workspace/docker-cache/spareshop.tar
-      - checkout
-      - run:
-          name: Install Git
-          command: |
-            apk update && apk add git && git --version
-      - run:
-          name: Tag Docker Image and Push to Docker Hub
-          command: |
-            export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-            export COMMIT_HASH=$(git rev-parse --short HEAD)
-            export CALVER_TAG=$(date +"%Y.%m.%d")-${BRANCH_NAME}-${COMMIT_HASH}
-            echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-
-            echo ${CALVER_TAG}
-            echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
-            echo "Start tag"
-            docker tag spareshop:latest ${DOCKER_USER}/spareshop:${CALVER_TAG}
-            echo "Start push"
-            docker push ${DOCKER_USER}/spareshop:${CALVER_TAG}          
-
-  manual-gh-release:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: Install GitHub CLI
-          command: |
-            curl -sSL "https://github.com/cli/cli/releases/download/v2.3.0/gh_2.3.0_linux_amd64.deb" -o "gh-cli.deb"
-            sudo apt install ./gh-cli.deb
-            rm gh-cli.deb
-      - run:
-          name: Authenticate with GitHub CLI
-          # environment:
-          #   GH_TOKEN: "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"
-          command: |
-            #!/bin/bash
-            # # echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
-            # [ -z "$GH_TOKEN" ] && echo "A GitHub token must be supplied. Check the \"token\" parameter." && exit 1
-            # echo "export GH_TOKEN=\"${GH_TOKEN}\"" >>"$BASH_ENV"
-            # echo $GH_TOKEN
-            # echo $PARAM_GH_TOKEN
-            # set GH_TOKEN "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"
-            # export GH_TOKEN
-            # source ~/.bashrc
-            # echo $GH_TOKEN | gh auth login --with-token
-            # echo "export GH_TOKEN=\"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\"" >> ~/.bashrc
-            # gh auth login
-            echo "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" > mytoken.txt
-            
-            gh auth login --with-token < mytoken.txt
-            # gh auth login --hostname "GitHub.com"
-      - run:
-          name: Create GitHub Release with Debug Logging
-          command: |
-            gh release create --debug 1.1.0 \
-              --title "Add Feature: Blinking text" \
-              --notes-file changelog.md
-
-      # - run:
-      #     name: Get CALVER_TAG
-      #     command: |
-      #       export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-      #       export COMMIT_HASH=$(git rev-parse --short HEAD)
-      #       export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
-      #       echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-      # - run:
-      #     name: Tag Git Repository
-      #     command: |
-      #       export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-      #       export COMMIT_HASH=$(git rev-parse --short HEAD)
-      #       export CALVER_TAG=$(date +"%Y.%m.%d-%H.%M.%S")-${BRANCH_NAME}-${COMMIT_HASH}
-      #       echo "export CALVER_TAG=${CALVER_TAG}" >> $BASH_ENV
-      #       git config --global user.email "ranasherif447@gmail.com"
-      #       git config --global user.name "RanaMoSherif"
-      #       git tag ${CALVER_TAG}
-      #       git push --set-upstream origin ${BRANCH_NAME}
-      #       git push origin ${CALVER_TAG}
-
-      # - run:
-      #     name: Tag Docker Image and Push to Amazon ECR
-      #     command: |
-      #       docker tag spareshop:latest <ECR_REPOSITORY_URL>:${CALVER_TAG}
-      #       $(aws ecr get-login --no-include-email --region <REGION>)
-      #       docker push <ECR_REPOSITORY_URL>:${CALVER_TAG}
-
-  # deploy-to-ecs:
-  #   executor: aws-ecs/default
-  #   steps:
-  #     - checkout
-  #     - aws-ecs/deploy_service_update:
-  #         family: <YOUR_TASK_DEFINITION_NAME>
-  #         cluster-name: <YOUR_CLUSTER_NAME>
-  #         service-name: <YOUR_SERVICE_NAME>
-  #         container-image-name-updates: "container=<YOUR_CONTAINER_NAME>,image=${DOCKER_USER}/spareshop:${CALVER_TAG}"
-
 orbs:
-  # gh: circleci/github-cli@2.2.0
   aws-ecs: circleci/aws-ecs@3.2.0
   aws-ecr: circleci/aws-ecr@8.1.3
 
@@ -186,15 +58,6 @@ workflows:
       - unit-test-and-analyze-dotnet:
           requires:
             - build-dotnet
-      # - build-docker-image:
-      #     requires:
-      #       - build-dotnet
-      # - tag-docker-and-push:
-      #     context: Docker
-      #     requires:
-      #       - build-dotnet
-      #       - unit-test-and-analyze-dotnet
-      #       - build-docker-image
       - aws-ecr/build-and-push-image:
           context: aws-dev
           create-repo: false
@@ -203,35 +66,11 @@ workflows:
           repo: dev-testci-service
           tag: "$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
-            # - build-dotnet
             - unit-test-and-analyze-dotnet
-            # - build-docker-image
       - aws-ecs/deploy-service-update:
           context: aws-dev
-          # requires:
-          #   - aws-ecr/build-and-push-image # only run this job once aws-ecr/build-and-push-image has completed
           family: "dev-testci-service"
           cluster: "revamp-stg-cluster"
           container-image-name-updates: "container=dev-testci-service,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - aws-ecr/build-and-push-image
-
-      # - manual-gh-release:
-      #     context:
-      #       - GITHUB_CREDS
-      #     # requires:
-      #     #   - build-dotnet
-
-      # - gh/release:
-      #     # tag: ${CALVER_TAG} # Use the generated CALVER_TAG for the release
-      #     # title: "Release ${CALVER_TAG}" # Use the generated CALVER_TAG in the title
-      #     tag: 1.1.0
-      #     title: "Add Feature: Blinking text"
-      #     requires:
-      #       - build-dotnet
-      #     context:
-      #       - GITHUB_CREDS
-      # - deploy-to-ecs:
-      #     context: AWS
-      #     requires:
-      #       - tag-docker-and-push
