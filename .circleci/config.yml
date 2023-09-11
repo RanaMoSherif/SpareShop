@@ -1,8 +1,19 @@
 version: 2.1
+parameters:
+  sln_file: "."
+  sonarcloud_project_key: "RanaMoSherif_SpareShop"
+  sonarcloud_organization: "ranamosherif"
+  sonarcloud_login: "fa31d45ec468d62a8bbaa122137e83fb1621ba9f"
+  dotnet_version: "7.0"  # Add the dotnet_version parameter here
+  repo: "dev-testci-service"  # Add the repo parameter here
+  family: "dev-testci-service"  # Add the family parameter here
+  cluster: "revamp-stg-cluster"  # Add the cluster parameter here
+  container_image_name_updates: "container=dev-testci-service,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"  # Add the container_image_name_updates parameter here
+
 jobs:
   build-dotnet:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:7.0
+      - image: mcr.microsoft.com/dotnet/sdk:${{ parameters.dotnet_version }}  # Use the dotnet_version parameter here
     resource_class: small
     steps:
       - checkout
@@ -12,10 +23,11 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
-            dotnet build 
+            dotnet build
+
   test-dotnet:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:7.0
+      - image: mcr.microsoft.com/dotnet/sdk:${{ parameters.dotnet_version }}  # Use the dotnet_version parameter here
     resource_class: small
     steps:
       - checkout
@@ -33,10 +45,10 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
-            dotnet sonarscanner begin /k:RanaMoSherif_SpareShop /o:ranamosherif /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
+            dotnet sonarscanner begin /k:$sonarcloud_project_key /o:$sonarcloud_organization /d:sonar.login=$sonarcloud_login /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
             dotnet build
-            dotnet test --no-restore --no-build --verbosity normal -f net7.0 --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
-            dotnet sonarscanner end /d:sonar.login=fa31d45ec468d62a8bbaa122137e83fb1621ba9f
+            dotnet test --no-restore --no-build --verbosity normal -f net${{ parameters.dotnet_version }} --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
+            dotnet sonarscanner end /d:sonar.login=$sonarcloud_login
       - run:
           name: Convert TRX to JUnit to show in CircleCI tests
           command: |
@@ -55,7 +67,7 @@ workflows:
   dotnet-pipeline-flow:
     jobs:
       - build-dotnet
-      - test-dotnet:
+      - unit-test-and-analyze-dotnet:
           requires:
             - build-dotnet
       - aws-ecr/build-and-push-image:
@@ -63,14 +75,14 @@ workflows:
           create-repo: false
           dockerfile: Dockerfile
           path: .
-          repo: dev-testci-service
-          tag: "$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          repo: ${{ parameters.repo }}  # Use the repo parameter here
+          tag: "${{ parameters.container_image_name_updates }}"  # Use the container_image_name_updates parameter here
           requires:
-            - test-dotnet
+            - unit-test-and-analyze-dotnet
       - aws-ecs/deploy-service-update:
           context: aws-dev
-          family: "dev-testci-service"
-          cluster: "revamp-stg-cluster"
-          container-image-name-updates: "container=dev-testci-service,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          family: ${{ parameters.family }}  # Use the family parameter here
+          cluster: ${{ parameters.cluster }}  # Use the cluster parameter here
+          container-image-name-updates: "${{ parameters.container_image_name_updates }}"  # Use the container_image_name_updates parameter here
           requires:
             - aws-ecr/build-and-push-image
