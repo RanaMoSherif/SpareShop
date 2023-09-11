@@ -32,7 +32,7 @@ parameters:
 jobs:
   build-dotnet:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:${{ parameters.dotnet_version }}
+      - image: mcr.microsoft.com/dotnet/sdk:<< pipeline.parameters.dotnet_version >>
     resource_class: small
     steps:
       - checkout
