@@ -46,7 +46,7 @@ jobs:
 
   test-dotnet:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:${{ parameters.dotnet_version }}  # Use the dotnet_version parameter here
+      - image: mcr.microsoft.com/dotnet/sdk:<< pipeline.parameters.dotnet_version >>  # Use the dotnet_version parameter here
     resource_class: small
     steps:
       - checkout
@@ -66,7 +66,7 @@ jobs:
             dotnet restore $SLN_FILE
             dotnet sonarscanner begin /k:$sonarcloud_project_key /o:$sonarcloud_organization /d:sonar.login=$sonarcloud_login /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
             dotnet build
-            dotnet test --no-restore --no-build --verbosity normal -f net${{ parameters.dotnet_version }} --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
+            dotnet test --no-restore --no-build --verbosity normal -f net$<< pipeline.parameters.dotnet_version >> --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
             dotnet sonarscanner end /d:sonar.login=$sonarcloud_login
       - run:
           name: Convert TRX to JUnit to show in CircleCI tests
@@ -94,14 +94,14 @@ workflows:
           create-repo: false
           dockerfile: Dockerfile
           path: .
-          repo: ${{ parameters.repo }}  # Use the repo parameter here
-          tag: "${{ parameters.container_image_name_updates }}"  # Use the container_image_name_updates parameter here
+          repo: << pipeline.parameters.repo >>
+          tag: << pipeline.parameters.container_image_name_updates >>
           requires:
             - test-dotnet
       - aws-ecs/deploy-service-update:
           context: aws-dev
-          family: ${{ parameters.family }}  # Use the family parameter here
-          cluster: ${{ parameters.cluster }}  # Use the cluster parameter here
-          container-image-name-updates: "${{ parameters.container_image_name_updates }}"  # Use the container_image_name_updates parameter here
+          family: << pipeline.parameters.family >>
+          cluster: << pipeline.parameters.cluster >> 
+          container-image-name-updates: << pipeline.parameters.container_image_name_updates >>
           requires:
             - aws-ecr/build-and-push-image
