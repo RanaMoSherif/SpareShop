@@ -56,7 +56,7 @@ jobs:
             apt-get update && apt-get install -y openjdk-17-jdk-headless
             set JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
             export JAVA_HOME
-            dotnet tool install --global dotnet-sonarscanner --version 5.11.0
+            dotnet tool install --global dotnet-sonarscanner
             echo 'export PATH="$PATH:/root/.dotnet/tools"' >> $BASH_ENV
       - run:
           name: Run sonarscanner
