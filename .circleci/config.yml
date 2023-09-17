@@ -21,10 +21,6 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - dotnet-v1-{{ .Branch }}-
-            - dotnet-v1-
       - run:
           name: build
           command: |
@@ -32,22 +28,13 @@ jobs:
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
             dotnet build
-      - save_cache:
-          key: dotnet-v1-{{ .Branch }}-{{ checksum "path/to/your/project.csproj" }}
-          paths:
-            - ~/.nuget/packages
-            - ~/.local/share/NuGet/Cache
 
   test-dotnet:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:<< pipeline.parameters.dotnet_version >>
+      - image: mcr.microsoft.com/dotnet/sdk:<< pipeline.parameters.dotnet_version >>  # Use the dotnet_version parameter here
     resource_class: small
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - dotnet-v1-{{ .Branch }}-
-            - dotnet-v1-
       - run:
           name: Install sonarscanner 
           command: |
@@ -76,18 +63,30 @@ jobs:
           path: ./TestResults.xml
       - store_artifacts:
           path: ./TestResults.xml
-      - save_cache:
-          key: dotnet-v1-{{ .Branch }}-{{ checksum "path/to/your/project.csproj" }}
-          paths:
-            - ~/.nuget/packages
-            - ~/.local/share/NuGet/Cache
+  verify-deployment:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - run:
+          command: >
+            TASK_DEFINITION_ARN=$(aws ecs describe-task-definition \
+                --task-definition ${MY_APP_PREFIX}-service \
+                --output text \
+                --query 'taskDefinition.taskDefinitionArn' \
+                --profile default)
+            echo "export TASK_DEFINITION_ARN='${TASK_DEFINITION_ARN}'" >> $BASH_ENV
+          name: Get last task definition
+      - aws-ecs/verify-revision-is-deployed:
+          cluster: << pipeline.parameters.aws_cluster >> 
+          family: << pipeline.parameters.repo_service_name >>
+          task-definition-arn: ${TASK_DEFINITION_ARN}
+
 
 orbs:
   aws-ecs: circleci/aws-ecs@3.2.0
   aws-ecr: circleci/aws-ecr@8.1.3
 
 workflows:
-  version: 2
   dotnet-pipeline-flow:
     jobs:
       - build-dotnet
@@ -111,3 +110,6 @@ workflows:
           container-image-name-updates: "container=<< pipeline.parameters.repo_service_name >>,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - aws-ecr/build-and-push-image
+      - verify-deployment:
+          requires:
+            - aws-ecs/deploy-service-update
