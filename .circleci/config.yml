@@ -57,7 +57,8 @@ jobs:
           name: Convert TRX to JUnit to show in CircleCI tests
           command: |
               dotnet tool install --global trx2junit
-              trx2junit /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.trx
+              TEST_RESULT_TRX=$(find . -name "TestResults.trx")
+              trx2junit $TEST_RESULT_TRX
       - store_test_results:
           path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
       - store_artifacts:
