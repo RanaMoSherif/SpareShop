@@ -49,10 +49,10 @@ jobs:
             SLN_FILE=$(find . -name "*.sln")
             echo "Found solution file: $SLN_FILE"
             dotnet restore $SLN_FILE
-            dotnet sonarscanner begin /k:<< pipeline.parameters.repo_service_name >> /o:$SONAR_ORG /d:sonar.login=$SONAR_TOKEN /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
+            dotnet sonarscanner begin /k:$sonarcloud_project_key /o:$sonarcloud_organization /d:sonar.login=$sonarcloud_login /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
             dotnet build
             dotnet test --no-restore --no-build --verbosity normal -f net<< pipeline.parameters.dotnet_version >> --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover $SLN_FILE
-            dotnet sonarscanner end /d:sonar.login=$SONAR_TOKEN
+            dotnet sonarscanner end /d:sonar.login=$sonarcloud_login
       - run:
           name: Convert TRX to JUnit to show in CircleCI tests
           command: |
@@ -63,6 +63,24 @@ jobs:
           path: ./TestResults.xml
       - store_artifacts:
           path: ./TestResults.xml
+  verify-deployment:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - run:
+          command: >
+            TASK_DEFINITION_ARN=$(aws ecs describe-task-definition \
+                --task-definition ${MY_APP_PREFIX}-service \
+                --output text \
+                --query 'taskDefinition.taskDefinitionArn' \
+                --profile default)
+            echo "export TASK_DEFINITION_ARN='${TASK_DEFINITION_ARN}'" >> $BASH_ENV
+          name: Get last task definition
+      - aws-ecs/verify-revision-is-deployed:
+          cluster: << pipeline.parameters.aws_cluster >> 
+          family: << pipeline.parameters.repo_service_name >>
+          task-definition-arn: ${TASK_DEFINITION_ARN}
+
 
 orbs:
   aws-ecs: circleci/aws-ecs@3.2.0
@@ -92,3 +110,6 @@ workflows:
           container-image-name-updates: "container=<< pipeline.parameters.repo_service_name >>,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - aws-ecr/build-and-push-image
+      - verify-deployment:
+          requires:
+            - aws-ecs/deploy-service-update
