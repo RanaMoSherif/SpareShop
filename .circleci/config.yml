@@ -51,7 +51,7 @@ jobs:
             dotnet restore $SLN_FILE
             dotnet sonarscanner begin /k:$sonarcloud_project_key /o:$sonarcloud_organization /d:sonar.login=$sonarcloud_login /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**\coverage*.opencover.xml" /d:sonar.coverage.exclusions="**test*/*.cs,**Tests*.cs,**Mock*.cs" 
             dotnet build
-            dotnet test --no-restore --no-build --verbosity normal -f net7.0 --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
+            dotnet test --no-restore --no-build --verbosity normal -f net<< pipeline.parameters.dotnet_version >> --logger "trx;LogFileName=TestResults.trx" --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover Tests/BestAutoUnitTesting/BestAutoUnitTesting.csproj
             dotnet sonarscanner end /d:sonar.login=$sonarcloud_login
       - run:
           name: Convert TRX to JUnit to show in CircleCI tests
