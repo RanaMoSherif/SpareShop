@@ -58,11 +58,11 @@ jobs:
           command: |
               dotnet tool install --global trx2junit
               TEST_RESULT_TRX=$(find . -name "TestResults.trx")
-              trx2junit $TEST_RESULT_TRX
+              trx2junit $TEST_RESULT_TRX --output ./
       - store_test_results:
-          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
+          path: ./TestResults.xml
       - store_artifacts:
-          path: /root/project/Tests/BestAutoUnitTesting/TestResults/TestResults.xml
+          path: ./TestResults.xml
 
 orbs:
   aws-ecs: circleci/aws-ecs@3.2.0
