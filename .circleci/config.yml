@@ -96,7 +96,7 @@ workflows:
           dockerfile: Dockerfile
           path: .
           repo: << pipeline.parameters.repo_service_name >>
-          tag: "container=<< pipeline.parameters.repo_service_name >>,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+          tag: "$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - test-dotnet
       - aws-ecs/deploy-service-update:
