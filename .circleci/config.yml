@@ -1,32 +1,17 @@
 version: 2.1
 
 parameters:
-  sln_file:
-    default: "."
-    type: string
-  sonarcloud_project_key: 
-    default: "RanaMoSherif_SpareShop"
-    type: string
-  sonarcloud_organization: 
-    default: "ranamosherif"
-    type: string
-  sonarcloud_login: 
-    default: "fa31d45ec468d62a8bbaa122137e83fb1621ba9f"
-    type: string
   dotnet_version: 
     default: "7.0"
     type: string
   repo_service_name: 
     default: "dev-testci-service"
     type: string
-  family: 
-    default: "dev-testci-service"
-    type: string
-  cluster: 
+  aws_cluster: 
     default: "revamp-stg-cluster"
     type: string
-  container_image_name_updates: 
-    default: "container=dev-testci-service,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
+  aws_context: 
+    default: "aws-dev"
     type: string
 
 jobs:
@@ -91,7 +76,7 @@ workflows:
           requires:
             - build-dotnet
       - aws-ecr/build-and-push-image:
-          context: aws-dev
+          context: << pipeline.parameters.aws_context >>
           create-repo: false
           dockerfile: Dockerfile
           path: .
@@ -100,9 +85,9 @@ workflows:
           requires:
             - test-dotnet
       - aws-ecs/deploy-service-update:
-          context: aws-dev
+          context: << pipeline.parameters.aws_context >>
           family: << pipeline.parameters.repo_service_name >>
-          cluster: << pipeline.parameters.cluster >> 
+          cluster: << pipeline.parameters.aws_cluster >> 
           container-image-name-updates: "container=<< pipeline.parameters.repo_service_name >>,tag=$(date +\"%Y.%m.%d\")-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)"
           requires:
             - aws-ecr/build-and-push-image
